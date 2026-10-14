@@ -1,0 +1,8 @@
+"use client";
+import {useState} from "react";
+import Link from "next/link";
+import {PageHeading,Icon} from "../../../components/ui";
+export default function SettingsPage(){
+ const [name,setName]=useState("Tanveer Singh");const [saved,setSaved]=useState(false);
+ return <><PageHeading kicker="YOUR WORKSPACE" title="Keep it personal." description="A quiet place for your research preferences."/><section className="settings-section"><div><h2 className="section-title">Profile preview</h2><p>Name changes are local to this form. No account service is connected.</p></div><form onSubmit={e=>{e.preventDefault();setSaved(true);}} className="stack"><label className="field">Display name<input value={name} onChange={e=>{setName(e.target.value);setSaved(false);}} required maxLength={80}/></label><button className="button secondary" type="submit">{saved?"Preview saved":"Save preview"}<Icon name={saved?"check":"right"} size={15}/></button><p className="field-note" role="status">{saved?"Your form preview has been updated.":""}</p></form></section><section className="settings-section"><div><h2 className="section-title">Your research notes</h2><p>Notes and bookmarks are stored in this browser.</p></div><Link href="/notes" className="text-link">Manage research notes <Icon name="right" size={15}/></Link></section><section className="settings-section"><div><h2 className="section-title">Motion & accessibility</h2><p>Animations respect your device’s reduced-motion preference. Every research control supports keyboard navigation.</p></div><Link href="/trust" className="text-link">Read the evidence limits <Icon name="external" size={15}/></Link></section></>;
+}
