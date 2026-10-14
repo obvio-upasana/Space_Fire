@@ -7,7 +7,7 @@
 
 * { box-sizing: border-box; }
 body { margin: 0; }
-main { max-width: 720px; margin: 0 auto; padding: 96px 24px; }
+main { min-width: 0; }
 h1 { margin: 16px 0; font-size: clamp(40px, 8vw, 64px); letter-spacing: -0.04em; }
 p { font-size: 18px; line-height: 1.6; }
 .label { font-size: 14px; color: #555; }

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import "./globals.css";
 import "./tokens.css";
+import "./ui.css";
 import { neue, book, kode } from "./fonts";
 
 export const metadata: Metadata = {
