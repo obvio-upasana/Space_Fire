@@ -16,9 +16,9 @@ export function LandingMotion({children}:{children:ReactNode}) {
       const tick=(time:number)=>lenis.raf(time*1000);
       gsap.ticker.add(tick);
       lenis.on("scroll",ScrollTrigger.update);
-      gsap.from(".hero-enter",{y:32,opacity:0,duration:.9,stagger:.1,ease:"power3.out",delay:.1});
+      gsap.from(".hero-enter",{y:24,duration:.8,stagger:.06,ease:"power3.out"});
       gsap.utils.toArray<HTMLElement>(".word-reveal").forEach(element=>{
-        gsap.fromTo(element.querySelectorAll(".reveal-word"),{color:"#afbdc7"},{color:"#272b2d",stagger:.15,ease:"none",scrollTrigger:{trigger:element,start:"top 80%",end:"bottom 45%",scrub:1}});
+        gsap.fromTo(element.querySelectorAll(".reveal-word"),{color:"#7c8991"},{color:"#272b2d",stagger:.15,ease:"none",scrollTrigger:{trigger:element,start:"top 80%",end:"bottom 45%",scrub:1}});
       });
       gsap.utils.toArray<HTMLElement>(".reveal-up").forEach(element=>gsap.from(element,{y:32,duration:.8,ease:"power3.out",scrollTrigger:{trigger:element,start:"top 92%",once:true}}));
       let alive=true;

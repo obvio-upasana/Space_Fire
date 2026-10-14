@@ -14,6 +14,7 @@ import "./ai.css";
 import "./notes.css";
 import "./library.css";
 import "./analysis.css";
+import "./professional.css";
 import { neue, book, kode } from "./fonts";
 
 export const metadata: Metadata = {

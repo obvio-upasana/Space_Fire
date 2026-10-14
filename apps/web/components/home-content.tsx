@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { WordReveal } from "./landing-motion";
 import { Icon, Brand, ButtonLink } from "./ui";
-import { OrbitArt } from "./orbit-art";
+import { EvidenceStack } from "./evidence-stack";
 
 export function HomeContent() {
   return <><ScienceStory /><Workflow /><Archive /><Questions /><HomeFooter /></>;
@@ -13,7 +13,7 @@ function ScienceStory() {
     <p className="eyebrow">WHY WE’RE BUILDING</p>
     <WordReveal text="A flame changes in space. Our understanding should follow." />
     <p className="section-copy">Decades of experiments tell us how fire behaves beyond Earth. FlameAtlas brings their findings, conditions and original sources into one place to explore.</p>
-    <OrbitArt />
+    <EvidenceStack />
     <p className="mono">A DIFFERENT ENVIRONMENT. A BETTER QUESTION.</p>
   </section>;
 }
