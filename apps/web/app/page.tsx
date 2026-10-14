@@ -2,13 +2,14 @@ import { HomeNav } from "../components/home-nav";
 import { LandingMotion } from "../components/landing-motion";
 import { ButtonLink, Icon } from "../components/ui";
 import { HomeContent } from "../components/home-content";
-import { OrbitArt } from "../components/orbit-art";
+import CloudSky from "../components/cloud-sky";
 
 export default function Home() {
   return <LandingMotion>
     <HomeNav />
     <main id="main-content">
       <section className="landing-hero">
+        <CloudSky />
         <div className="hero-content">
           <p className="hero-topline hero-enter">FIRE SCIENCE, BEYOND EARTH.</p>
           <h1 className="hero-title hero-enter">Fire behaves<br />differently here.</h1>
@@ -18,9 +19,6 @@ export default function Home() {
             <ButtonLink href="/assistant" secondary>Ask the evidence</ButtonLink>
           </div>
           <p className="hero-note hero-enter">For curious minds, researchers and the next generation of explorers.</p>
-          <div className="hero-visual hero-enter" aria-hidden="true">
-            <OrbitArt light />
-          </div>
         </div>
         <div className="hero-baseline mono"><a href="#science">SCROLL TO EXPLORE <Icon name="down" size={14} /></a><span>IGNITION → SPREAD → EXTINCTION</span></div>
       </section>
