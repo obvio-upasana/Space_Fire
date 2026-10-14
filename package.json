@@ -1,0 +1,13 @@
+{
+  "name": "space-fire",
+  "private": true,
+  "packageManager": "pnpm@12.10.1",
+  "engines": { "node": ">=22.14.0" },
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck"
+  },
+  "devDependencies": { "turbo": "2.11.8" }
+}
