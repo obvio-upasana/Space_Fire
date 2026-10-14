@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import "./globals.css";
 import "./tokens.css";
 import "./ui.css";
+import "./home.css";
 import { neue, book, kode } from "./fonts";
 
 export const metadata: Metadata = {
