@@ -11,6 +11,7 @@ import "./workspace.css";
 import "./research.css";
 import "./editorial.css";
 import "./ai.css";
+import "./notes.css";
 import { neue, book, kode } from "./fonts";
 
 export const metadata: Metadata = {
