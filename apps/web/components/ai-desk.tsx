@@ -4,7 +4,7 @@ import Link from "next/link";
 import {Icon,Badge} from "./ui";
 import {BrandMark} from "./brand-mark";
 import {sources} from "../lib/demo";
-import {saveNote} from "../lib/research-state";
+
 
 type ResearchMode = "Explain" | "Compare" | "Mission match" | "Research brief";
 interface Message { id:number; role:"user"|"assistant"; text:string; title?:string; citations:string[]; mode:ResearchMode; }
@@ -30,7 +30,7 @@ export function AiDesk() {
   const [messages,setMessages]=useState<Message[]>([]);
   const [phase,setPhase]=useState(-1);
   const [expanded,setExpanded]=useState(true);
-  const [saved,setSaved]=useState<number[]>([]);
+  
   const [copied,setCopied]=useState<number|null>(null);
   const [attachment,setAttachment]=useState("");
   const [copyError,setCopyError]=useState("");
@@ -43,7 +43,7 @@ export function AiDesk() {
   function cancel(){timers.current.forEach(clearTimeout);timers.current=[];setPhase(-1);}
   useEffect(()=>()=>timers.current.forEach(clearTimeout),[]);
   useEffect(()=>{
-    const reset=()=>{timers.current.forEach(clearTimeout);timers.current=[];setMessages([]);setPhase(-1);setInput("");setSaved([]);};
+    const reset=()=>{timers.current.forEach(clearTimeout);timers.current=[];setMessages([]);setPhase(-1);setInput("");};
     window.addEventListener("flameatlas-new-question",reset);
     return()=>window.removeEventListener("flameatlas-new-question",reset);
   },[]);
@@ -63,20 +63,23 @@ export function AiDesk() {
     try{await navigator.clipboard.writeText(message.title+"\n\n"+message.text);setCopied(message.id);setCopyError("");}
     catch{setCopyError("Clipboard access is unavailable. You can select and copy the response text.");}
   }
-  function note(message:Message) {
-    saveNote({title:message.title??"Research response",body:message.text,sourceIds:message.citations});
-    setSaved(previous=>[...previous,message.id]);
+  function download(message:Message) {
+    const references=message.citations.map(id=>{const source=sources.find(s=>s.id===id);return source?source.title+": "+source.url:"";}).join("\\n");
+    const content="# "+message.title+"\\n\\n"+message.text+"\\n\\nReferences\\n"+references;
+    const url=URL.createObjectURL(new Blob([content],{type:"text/markdown"}));
+    const link=document.createElement("a");link.href=url;link.download="flameatlas-research.md";link.click();
+    setTimeout(()=>URL.revokeObjectURL(url),1000);
   }
   return <section className={messages.length?"ai-desk has-conversation":"ai-desk"}>
     {!messages.length&&<div className="ai-welcome"><div className="ai-emblem"><BrandMark/></div><p className="eyebrow">YOUR AI RESEARCH DESK</p><h1>What would you like<br/>to understand?</h1><p>Ask a question. Connect the research. Follow the source.</p></div>}
     {!!messages.length&&<div className="conversation-heading"><Link href="/sources" className="text-link">Research desk <Icon name="next" size={13}/> Original evidence</Link><button className="icon-button" title="New question" aria-label="Start a new question" onClick={()=>window.dispatchEvent(new Event("flameatlas-new-question"))}><Icon name="plus"/></button></div>}
-    <div className="chat-messages" aria-live="polite">{messages.map(message=>message.role==="user"?<div className="user-message" key={message.id}><span className="avatar">TS</span><p>{message.text}</p></div>:<article className="ai-message" key={message.id}><div className="row"><span className="response-mark"><BrandMark/></span><span className="mono">FLAMEATLAS</span><Badge tone="neutral">{message.mode}</Badge></div><h2>{message.title}</h2>{message.text.split("\n\n").map((paragraph,index)=><p key={index}>{paragraph}</p>)}<div className="response-sources">{message.citations.map(id=>{const source=sources.find(s=>s.id===id);return source?<button key={id} type="button" onClick={()=>setSourceId(id)}><span className="mono">{id}</span><Icon name={source.type==="Dataset"?"database":"file"} size={15}/><span>{source.title}</span><Icon name="external" size={14}/></button>:null;})}</div><div className="response-actions"><button onClick={()=>copy(message)}><Icon name={copied===message.id?"check":"copy"} size={15}/>{copied===message.id?"Copied":"Copy response"}</button><button onClick={()=>note(message)} disabled={saved.includes(message.id)}><Icon name={saved.includes(message.id)?"check":"file"} size={15}/>{saved.includes(message.id)?"Saved to notes":"Save as a note"}</button><Link href="/notes">Open notes <Icon name="external" size={14}/></Link></div></article>)}
+    <div className="chat-messages" aria-live="polite">{messages.map(message=>message.role==="user"?<div className="user-message" key={message.id}><span className="avatar">TS</span><p>{message.text}</p></div>:<article className="ai-message" key={message.id}><div className="row"><span className="response-mark"><BrandMark/></span><span className="mono">FLAMEATLAS</span><Badge tone="neutral">{message.mode}</Badge></div><h2>{message.title}</h2>{message.text.split("\n\n").map((paragraph,index)=><p key={index}>{paragraph}</p>)}<div className="response-sources">{message.citations.map(id=>{const source=sources.find(s=>s.id===id);return source?<button key={id} type="button" onClick={()=>setSourceId(id)}><span className="mono">{id}</span><Icon name={source.type==="Dataset"?"database":"file"} size={15}/><span>{source.title}</span><Icon name="external" size={14}/></button>:null;})}</div><div className="response-actions"><button onClick={()=>copy(message)}><Icon name={copied===message.id?"check":"copy"} size={15}/>{copied===message.id?"Copied":"Copy response"}</button><button onClick={()=>download(message)}><Icon name="download" size={15}/>Download response</button></div></article>)}
       {phase>=0&&<div className="research-activity"><button className="activity-heading" onClick={()=>setExpanded(!expanded)} aria-expanded={expanded}><Icon name={busy?"spinner":"check"} size={16} className={busy?"spin":""}/><span>{busy?"Working through the evidence":"Research steps complete"}</span><Icon name={expanded?"chevron":"next"} size={13}/></button>{expanded&&<ol>{steps.map((step,index)=><li key={step} className={index<phase?"complete":index===phase?"current":"pending"}><Icon name={index<phase?"check":index===phase?"spinner":"clock"} size={13} className={index===phase?"spin":""}/><span>{step}</span><small>{index<phase?"Complete":index===phase?"In progress":"Queued"}</small></li>)}</ol>}</div>}
       {copyError&&<p role="status" className="field-note">{copyError}</p>}<div ref={bottom}/>
     </div>
     <div className="composer-area"><form onSubmit={submit} className="ai-composer"><textarea aria-label="Research question" placeholder="Ask about a material, a condition, a mission..." value={input} onChange={event=>setInput(event.target.value)} rows={2} maxLength={4000} onKeyDown={event=>{if(event.key==="Enter"&&!event.shiftKey&&!event.nativeEvent.isComposing){event.preventDefault();send();}}}/>{attachment&&<span className="attachment-chip"><Icon name="file" size={13}/>{attachment}<button type="button" onClick={()=>setAttachment("")} aria-label="Remove attachment"><Icon name="close" size={12}/></button><small>File name only; analysis is unavailable.</small></span>}<div className="composer-toolbar"><div className="row"><button type="button" className="icon-button" aria-label="Attach a reference file" onClick={()=>fileInput.current?.click()}><Icon name="clip" size={18}/></button><input type="file" ref={fileInput} hidden accept=".pdf,.txt,.csv,.xlsx" onChange={e=>setAttachment(e.target.files?.[0]?.name??"")}/><label className="mode-label"><Icon name="sliders" size={15}/><select value={mode} aria-label="Research mode" onChange={e=>setMode(e.target.value as ResearchMode)}>{["Explain","Compare","Mission match","Research brief"].map(value=><option key={value}>{value}</option>)}</select></label></div>{busy?<button type="button" onClick={cancel} className="stop-button">Stop</button>:<button type="submit" disabled={!input.trim()} className="send-button" aria-label="Send question"><Icon name="up" size={18}/></button>}</div></form>
     {!messages.length&&<div className="prompt-grid">{suggestions.map(([question,selectedMode])=><button key={question} onClick={()=>send(question,selectedMode)}><span>{question}</span><Icon name="external" size={15}/></button>)}</div>}
     <p className="composer-footnote">Ground your question in the conditions. <Link href="/trust">Evidence & limits</Link></p></div>
-  {selectedSource&&<div className="source-preview-overlay"><button className="source-preview-scrim" aria-label="Close source preview" onClick={()=>setSourceId(null)}/><aside className="source-preview" aria-label="Source reference"><div className="row-between"><p className="eyebrow">ORIGINAL REFERENCE</p><button className="icon-button" aria-label="Close source preview" onClick={()=>setSourceId(null)}><Icon name="close"/></button></div><div className="source-document"><Icon name={selectedSource.type==="Dataset"?"database":"file"} size={28}/><span className="mono">{selectedSource.id} / {selectedSource.type.toUpperCase()}</span><h2>{selectedSource.title}</h2><p>{selectedSource.author}</p><dl><div><dt>Program</dt><dd>{selectedSource.program}</dd></div><div><dt>Year</dt><dd>{selectedSource.year}</dd></div><div><dt>Availability</dt><dd>{selectedSource.status}</dd></div></dl><p className="field-note">This panel identifies the source. Open the original to review full text and measured results.</p></div><a className="button" href={selectedSource.url} target="_blank" rel="noreferrer">Read original source<Icon name="external" size={16}/></a><button className="button secondary" onClick={()=>{saveNote({title:selectedSource.title,body:"Reference to review: "+selectedSource.url,sourceIds:[selectedSource.id]});setSourceId(null);}}>Save reference to notes<Icon name="file" size={16}/></button></aside></div>}
+  {selectedSource&&<div className="source-preview-overlay"><button className="source-preview-scrim" aria-label="Close source preview" onClick={()=>setSourceId(null)}/><aside className="source-preview" aria-label="Source reference"><div className="row-between"><p className="eyebrow">ORIGINAL REFERENCE</p><button className="icon-button" aria-label="Close source preview" onClick={()=>setSourceId(null)}><Icon name="close"/></button></div><div className="source-document"><Icon name={selectedSource.type==="Dataset"?"database":"file"} size={28}/><span className="mono">{selectedSource.id} / {selectedSource.type.toUpperCase()}</span><h2>{selectedSource.title}</h2><p>{selectedSource.author}</p><dl><div><dt>Program</dt><dd>{selectedSource.program}</dd></div><div><dt>Year</dt><dd>{selectedSource.year}</dd></div><div><dt>Availability</dt><dd>{selectedSource.status}</dd></div></dl><p className="field-note">This panel identifies the source. Open the original to review full text and measured results.</p></div><a className="button" href={selectedSource.url} target="_blank" rel="noreferrer">Read original source<Icon name="external" size={16}/></a></aside></div>}
   </section>;
 }

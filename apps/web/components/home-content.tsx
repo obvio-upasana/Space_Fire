@@ -23,8 +23,8 @@ function Workflow() {
     <div><p className="eyebrow">A WAY THROUGH THE RESEARCH</p><h2>From a question<br />to a clearer view.</h2><p className="section-copy">Ask about a material, a mission or a condition. Follow the evidence. Keep what helps your research.</p></div>
     <dl className="interface-list">
       <div><dt><span>01</span><Link href="/assistant">Ask the evidence <Icon name="right" size={16} /></Link></dt><dd>Find relevant experiments and read a response with the source alongside it.</dd></div>
-      <div><dt><span>02</span><Link href="/compare">Compare the conditions <Icon name="right" size={16} /></Link></dt><dd>Put two studies together. See what matches, what differs and what needs a closer look.</dd></div>
-      <div><dt><span>03</span><Link href="/notes">Keep a research note <Icon name="right" size={16} /></Link></dt><dd>Save a response, keep the references and build on the next question.</dd></div>
+      <div><dt><span>02</span><Link href="/assistant">Connect the conditions <Icon name="right" size={16} /></Link></dt><dd>Put two studies together. See what matches, what differs and what needs a closer look.</dd></div>
+      <div><dt><span>03</span><Link href="/sources">Follow the original source <Icon name="right" size={16} /></Link></dt><dd>Read the original research, keep the reference and ask the next question.</dd></div>
     </dl>
   </section>;
 }

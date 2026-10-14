@@ -8,12 +8,8 @@ import "./home-sections.css";
 import "./home-footer.css";
 import "./auth.css";
 import "./workspace.css";
-import "./research.css";
 import "./editorial.css";
 import "./ai.css";
-import "./notes.css";
-import "./library.css";
-import "./analysis.css";
 import "./professional.css";
 import { neue, book, kode } from "./fonts";
 
