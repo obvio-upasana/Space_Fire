@@ -13,6 +13,7 @@ import "./ai.css";
 import "./professional.css";
 import "./product.css";
 import "./veritas.css";
+import "./simulation.css";
 import { neue, book, kode, figtree, newsreader } from "./fonts";
 
 export const metadata: Metadata = {

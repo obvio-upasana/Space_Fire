@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Icon } from "./ui";
 import { BrandMark } from "./brand-mark";
 import { sources } from "../lib/demo";
+import { ResearchResponse } from "./research-response";
 
 type ResearchMode = "Explain" | "Compare" | "Mission match" | "Research brief";
 interface Message {
@@ -13,12 +14,14 @@ interface Message {
   title?: string;
   citations: string[];
   mode: ResearchMode;
+  preview?: "answer" | "comparison" | "simulation";
 }
 const suggestions = [
   ["How does airflow change a flame in microgravity?", "Explain"],
-  ["Compare BASS-II and Saffire research.", "Compare"],
+  ["Compare flame behavior in Moon and Mars habitats.", "Compare"],
   ["What evidence applies to a lunar habitat?", "Mission match"],
-  ["Make a research brief on smoke detection.", "Research brief"],
+  ["Show an ISS flame simulation with oxygen and airflow controls.", "Explain"],
+  ["Explain cool flames and show a droplet simulation.", "Explain"],
 ] as const;
 const steps = [
   "Finding relevant sources",
@@ -31,6 +34,18 @@ function respond(
   mode: ResearchMode,
 ): { title: string; text: string; citations: string[] } {
   const q = question.toLowerCase();
+  if (q.includes("cool") || q.includes("cold"))
+    return {
+      title: "A flame can become invisible before combustion ends.",
+      text: "FLEX studied liquid fuel droplets in microgravity and observed continued low-temperature combustion after apparent visible flame extinction.\n\nThis is droplet-combustion evidence, not a fabric flammability test. Fuel chemistry, oxygen, pressure and transport conditions matter.\n\nThe simulation tab offers a qualitative illustration. It does not calculate temperature, reaction rates or extinction thresholds.",
+      citations: ["S08", "S05"],
+    };
+  if (mode === "Compare" || q.includes("mars"))
+    return {
+      title: "Compare habitats by their conditions, not by program name.",
+      text: "A Moon habitat and a Mars habitat have different gravity. A meaningful flame comparison also needs the same material, geometry, oxygen, pressure and forced airflow.\n\nThe environment tab holds illustrative atmosphere inputs equal to isolate gravity in the comparison. These describe pressurized habitats, not the ambient planetary surface.\n\nThe selected archive does not establish a matched Moon-versus-Mars fire-risk ranking. Review partial-gravity measurements before claiming a safety difference.",
+      citations: ["S04", "S01"],
+    };
   if (q.includes("moon") || q.includes("lunar") || mode === "Mission match")
     return {
       title: "Keep the environment in the comparison.",
@@ -42,12 +57,6 @@ function respond(
       title: "Look beyond the visible flame.",
       text: "Smoke detection asks a different question from flame spread. Particle size, material and the way smoke moves through an enclosed environment matter to the evidence you choose.\n\nStart with the SAME research and the low-gravity smoke-particulate report. Keep detector behavior separate from material-flammability results when assembling the brief.\n\nResearch next: identify the tested material, the particle metric and the actual detector conditions in the original paper.",
       citations: ["S07", "S05"],
-    };
-  if (mode === "Compare" || q.includes("saffire"))
-    return {
-      title: "Compare the question before the result.",
-      text: "BASS-II focuses on solid fuels in low-velocity forced flows. Saffire explores fire at larger scale inside an uncrewed spacecraft.\n\nBASS-II: begin with material, sample geometry, flow direction and oxygen.\nSaffire: keep the sample scale and enclosed vehicle conditions visible.\n\nUse the studies together for context, but do not turn those differences into an unqualified cross-program risk ranking.",
-      citations: ["S01", "S03"],
     };
   if (q.includes("airflow") || q.includes("ventilation"))
     return {
@@ -167,8 +176,17 @@ export function AiDesk() {
   }, [input]);
   useEffect(() => {
     const element = thread.current;
+    const answer =
+      messages.at(-1)?.role === "assistant"
+        ? element?.querySelector<HTMLElement>(".agent-answer:last-child")
+        : null;
     element?.scrollTo({
-      top: element.scrollHeight,
+      top: answer
+        ? element.scrollTop +
+          answer.getBoundingClientRect().top -
+          element.getBoundingClientRect().top -
+          12
+        : element.scrollHeight,
       behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
         ? "auto"
         : "smooth",
@@ -219,6 +237,11 @@ export function AiDesk() {
                 role: "assistant",
                 mode: selectedMode,
                 ...answer,
+                preview: /simulat|3d|cool|cold/i.test(question)
+                  ? "simulation"
+                  : selectedMode === "Compare" || /mars/i.test(question)
+                    ? "comparison"
+                    : "answer",
               },
             ]);
           }
@@ -376,9 +399,10 @@ export function AiDesk() {
               {
                 [
                   "Explain airflow",
-                  "Compare programs",
+                  "Moon vs Mars",
                   "Lunar habitat",
-                  "Smoke detection",
+                  "ISS simulation",
+                  "Cool flames",
                 ][index]
               }
             </button>
@@ -445,12 +469,19 @@ export function AiDesk() {
                         <span>{message.mode}</span>
                       </div>
                       <Activity phase={4} finished />
-                      <div className="agent-prose">
-                        <h2>{message.title}</h2>
-                        {message.text.split("\n\n").map((paragraph, index) => (
-                          <p key={index}>{paragraph}</p>
-                        ))}
-                      </div>
+                      <ResearchResponse
+                        initialView={message.preview}
+                        cool={message.citations.includes("S08")}
+                      >
+                        <div className="agent-prose">
+                          <h2>{message.title}</h2>
+                          {message.text
+                            .split("\n\n")
+                            .map((paragraph, index) => (
+                              <p key={index}>{paragraph}</p>
+                            ))}
+                        </div>
+                      </ResearchResponse>
                       <div className="agent-source-links">
                         {message.citations.map((id) => {
                           const reference = sources.find((s) => s.id === id);
