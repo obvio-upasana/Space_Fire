@@ -1,15 +1,17 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import "./globals.css";
+import "./tokens.css";
+import { neue, book, kode } from "./fonts";
 
 export const metadata: Metadata = {
-  title: "Space Fire",
-  description: "Space Fire frontend demo.",
+  title: { default: "FlameAtlas | Fire behaves differently here", template: "%s | FlameAtlas" },
+  description: "Explore the science of fire beyond Earth. A static demonstration of the FlameAtlas research workspace.",
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" className={`${neue.variable} ${book.variable} ${kode.variable}`}>
       <body>{children}</body>
     </html>
   );
