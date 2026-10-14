@@ -2,8 +2,9 @@
 import { WordReveal } from "./landing-motion";
 import { FlameArt, Icon } from "./ui";
 import Link from "next/link";
+import { programs } from "../lib/demo";
 
-export function HomeContent() { return <><ScienceStory /><Workflow /></>; }
+export function HomeContent() { return <><ScienceStory /><Workflow /><Archive /></>; }
 function ScienceStory() {
   return <section id="science" className="landing-section science-layout">
     <div><p className="eyebrow">01 / A DIFFERENT KIND OF FIRE</p>
@@ -24,5 +25,16 @@ function Workflow() {
       <div className="preview-answer"><p className="eyebrow">THE CONDITIONS MATTER.</p><p>Start with material, flow direction and oxygen. A result only makes sense alongside the conditions that produced it.</p><div className="preview-cite"><Icon name="file" size={16} /> BASS-II · NASA PSI <Icon name="external" size={14} /></div></div>
       <Link href="/assistant" className="text-link">Try the demo conversation <Icon name="right" size={16} /></Link>
     </div></div>
+  </section>;
+}
+function Archive() {
+  return <section id="programs" className="landing-section section-divider">
+    <div className="archive-heading"><div><p className="eyebrow">03 / MANY EXPERIMENTS. ONE ATLAS.</p><h2>A constellation<br />of discovery.</h2></div><p className="section-copy">From a single droplet to a spacecraft-scale fire. Follow the experiments that help us ask what happens next.</p></div>
+    <div className="home-program-grid">{programs.slice(0,4).map((program,index) => <Link href="/programs" className={`home-program ${program.color} reveal-up`} key={program.name}>
+      <div className="row-between"><span className="mono">0{index+1} / {program.platform.toUpperCase()}</span><Icon name="external" size={18}/></div>
+      <div className="program-glyph"><Icon name={index===0?"fire":index===1?"flask":index===2?"rocket":"atom"} size={56}/></div>
+      <h3>{program.name}</h3><p>{program.topic}</p><span className="program-years mono">{program.years}</span>
+    </Link>)}</div><Link href="/programs" className="text-link">Explore the full program map <Icon name="right" size={17}/></Link>
+    <div className="archive-proof"><p className="mono">BUILT AROUND ORIGINAL EVIDENCE</p><div><span>NASA PSI</span><span>NASA NTRS</span><span>ISS RESEARCH</span><span>OPEN SCIENCE</span></div></div>
   </section>;
 }
