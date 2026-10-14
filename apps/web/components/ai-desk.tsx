@@ -140,15 +140,6 @@ export function AiDesk() {
     timers.current.forEach(clearTimeout);
     timers.current = [];
   }
-  function reset() {
-    clearTimers();
-    setMessages([]);
-    setPhase(-1);
-    setInput("");
-    setSourceId(null);
-    setAttachment("");
-    setError("");
-  }
   useEffect(() => {
     const resetConversation = () => {
       timers.current.forEach(clearTimeout);
@@ -437,29 +428,12 @@ export function AiDesk() {
           </div>
         ) : (
           <>
-            <div className="agent-thread-header">
-              <button onClick={reset}>
-                <Icon name="plus" size={12} />
-                New chat
-              </button>
-              <span>{messages.find((m) => m.role === "user")?.text}</span>
-            </div>
             <div className="agent-thread" ref={thread}>
               <div className="agent-thread-inner">
                 {messages.map((message) =>
                   message.role === "user" ? (
                     <div className="agent-user" key={message.id}>
                       <p>{message.text}</p>
-                      <button
-                        aria-label="Copy question"
-                        onClick={() => copy(message)}
-                      >
-                        <Icon
-                          name={copied === message.id ? "check" : "copy"}
-                          size={11}
-                        />
-                        {copied === message.id ? "Copied" : "Copy"}
-                      </button>
                     </div>
                   ) : (
                     <article className="agent-answer" key={message.id}>

@@ -8,8 +8,9 @@ import { Brand, Icon, type IconName } from "./ui";
 gsap.registerPlugin(useGSAP);
 export const navigation: { href: string; label: string; icon: IconName }[] = [
   { href: "/assistant", label: "AI research desk", icon: "chat" },
-  { href: "/programs", label: "Research programs", icon: "flask" },
-  { href: "/sources", label: "Original sources", icon: "book" },
+  { href: "/simulation", label: "Simulation", icon: "sliders" },
+  { href: "/programs", label: "Research programs", icon: "compass" },
+  { href: "/sources", label: "Original sources", icon: "stack" },
 ];
 export function WorkspaceShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
