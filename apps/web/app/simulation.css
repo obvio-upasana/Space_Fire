@@ -437,3 +437,129 @@
   font-size: 11px;
   margin-top: 16px;
 }
+
+.standalone-simulation {
+  max-width: 1100px;
+  margin: auto;
+}
+.standalone-simulation .simulation-layout {
+  grid-template-columns: minmax(0, 1fr) 280px;
+}
+.standalone-simulation .flame-scene {
+  height: 480px;
+}
+.flame-scene {
+  background: #101c28;
+}
+.scene-label {
+  color: #a0b8ca;
+}
+.scene-instruction {
+  color: #8da8bc;
+}
+.simulation-heading {
+  padding: 20px 24px;
+}
+.simulation-heading h2 {
+  font-size: 20px;
+}
+.simulation-controls {
+  padding: 20px;
+  gap: 20px;
+}
+.simulation-controls > label {
+  font-size: 12px;
+}
+.select-trigger {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 38px;
+  background: white;
+  border: 1px solid #dce5ed;
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 12px;
+  color: #354e60;
+  text-align: left;
+}
+.select-trigger:hover,
+.select-trigger[aria-expanded="true"] {
+  border-color: #8cb0cc;
+  background: #f8fbfd;
+}
+.select-popup {
+  position: fixed;
+  z-index: 100;
+  padding: 6px;
+  background: white;
+  border: 1px solid #dce5ed;
+  border-radius: 8px;
+  box-shadow: 0 12px 32px #203c4e24;
+  outline: none;
+  max-height: 240px;
+  overflow: auto;
+  animation: menu-enter 0.14s ease-out;
+}
+.select-option {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  min-height: 38px;
+  padding: 9px 10px;
+  border-radius: 5px;
+  font-size: 12px;
+  color: #526773;
+  cursor: pointer;
+}
+.select-option.focused {
+  background: #edf4fa;
+  color: #2c5478;
+}
+.select-option[aria-selected="true"] {
+  color: #2c5478;
+  font-weight: 500;
+}
+.sidebar-link {
+  gap: 12px;
+}
+.sidebar-link svg {
+  width: 18px;
+  height: 18px;
+  color: #7a8fa0;
+}
+.sidebar-link.active svg {
+  color: #487aa8;
+}
+.agent-reference {
+  inset: 0;
+}
+@keyframes menu-enter {
+  from {
+    transform: translateY(-4px);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+@media (max-width: 760px) {
+  .standalone-simulation .simulation-layout {
+    grid-template-columns: 1fr;
+  }
+  .standalone-simulation .flame-scene {
+    height: 340px;
+  }
+  .simulation-heading {
+    padding: 16px;
+  }
+  .simulation-controls {
+    padding: 16px;
+    gap: 16px;
+  }
+  .select-trigger {
+    font-size: 11px;
+  }
+}

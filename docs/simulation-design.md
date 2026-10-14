@@ -1,12 +1,12 @@
 # In-chat comparison and illustration
 
-The frontend keeps one AI workspace. Starter prompts open an Answer, Environment comparison, or Simulation view inside a response. There is no separate comparison or simulation route.
+The frontend keeps one AI workspace. Starter prompts open an Answer, Environment comparison, or Simulation view inside a response. Comparison stays inside chat. Simulation also has a dedicated /simulation workspace route using the same controls and view.
 
 ## Evidence boundaries
 
 - Moon and Mars refer to pressurized habitat scenarios. The comparison holds sample, oxygen, pressure and forced airflow equal; it does not rank fire risk.
 - Gravity presets are approximate Earth ratios: ISS near zero, Moon 0.16, Mars 0.38, Earth 1.
-- The Three.js scene is an authored qualitative illustration. It changes geometry with gravity and airflow and adjusts visual opacity with oxygen. These mappings are presentation choices, not calibrated physics.
+- The Three.js scene is an authored qualitative illustration. Its procedural shader changes visual shape with gravity and airflow and opacity with oxygen. Animated turbulence and flame colors are authored visual effects. These mappings are presentation choices, not calibrated physics.
 - Pressure is an input recorded for context; it has no modeled effect on the scene.
 - Fabric and PMMA selections change the sample representation; material-specific burning rates are not calculated.
 - Cool-flame mode switches to a liquid droplet. It illustrates continued combustion after visible extinction without claiming to solve reaction chemistry.

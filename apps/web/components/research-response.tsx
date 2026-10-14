@@ -2,6 +2,7 @@
 import { useId, useState, type ReactNode } from "react";
 import { FlameScene } from "./flame-scene";
 import { Icon } from "./ui";
+import { SelectMenu } from "./select-menu";
 import {
   defaultScenario,
   environments,
@@ -14,10 +15,12 @@ export function ResearchResponse({
   children,
   initialView = "answer",
   cool = false,
+  standalone = false,
 }: {
   children: ReactNode;
   initialView?: View;
   cool?: boolean;
+  standalone?: boolean;
 }) {
   const panelId = useId();
   const [view, setView] = useState<View>(initialView);
@@ -44,49 +47,52 @@ export function ResearchResponse({
   ];
   return (
     <div className="research-response">
-      <div
-        className="research-view-tabs"
-        role="tablist"
-        aria-label="Research response view"
-      >
-        {tabs.map((tab) => (
-          <button
-            key={tab.id}
-            type="button"
-            role="tab"
-            id={panelId + "-" + tab.id}
-            aria-controls={panelId + "-panel"}
-            aria-selected={view === tab.id}
-            tabIndex={view === tab.id ? 0 : -1}
-            onKeyDown={(event) => {
-              const index = tabs.findIndex((t) => t.id === tab.id);
-              const next =
-                event.key === "ArrowRight"
-                  ? (index + 1) % tabs.length
-                  : event.key === "ArrowLeft"
-                    ? (index + tabs.length - 1) % tabs.length
-                    : event.key === "Home"
-                      ? 0
-                      : event.key === "End"
-                        ? tabs.length - 1
-                        : -1;
-              if (next < 0) return;
-              event.preventDefault();
-              const selected = tabs[next]!;
-              setView(selected.id);
-              document.getElementById(panelId + "-" + selected.id)?.focus();
-            }}
-            onClick={() => setView(tab.id)}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
+      {!standalone && (
+        <div
+          className="research-view-tabs"
+          role="tablist"
+          aria-label="Research response view"
+        >
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              type="button"
+              role="tab"
+              id={panelId + "-" + tab.id}
+              aria-controls={panelId + "-panel"}
+              aria-selected={view === tab.id}
+              tabIndex={view === tab.id ? 0 : -1}
+              onKeyDown={(event) => {
+                const index = tabs.findIndex((t) => t.id === tab.id);
+                const next =
+                  event.key === "ArrowRight"
+                    ? (index + 1) % tabs.length
+                    : event.key === "ArrowLeft"
+                      ? (index + tabs.length - 1) % tabs.length
+                      : event.key === "Home"
+                        ? 0
+                        : event.key === "End"
+                          ? tabs.length - 1
+                          : -1;
+                if (next < 0) return;
+                event.preventDefault();
+                const selected = tabs[next]!;
+                setView(selected.id);
+                document.getElementById(panelId + "-" + selected.id)?.focus();
+              }}
+              onClick={() => setView(tab.id)}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+      )}
       <div
         className="research-view-body"
-        role="tabpanel"
+        role={standalone ? "region" : "tabpanel"}
         id={panelId + "-panel"}
-        aria-labelledby={panelId + "-" + view}
+        aria-labelledby={standalone ? undefined : panelId + "-" + view}
+        aria-label={standalone ? "Simulation" : undefined}
       >
         {view === "answer" && children}
         {view === "comparison" && (
@@ -105,17 +111,15 @@ export function ResearchResponse({
               ].map((item) => (
                 <label key={item.label}>
                   <span>{item.label}</span>
-                  <select
-                    aria-label={item.label}
+                  <SelectMenu
+                    label={item.label}
                     value={item.value}
-                    onChange={(e) => item.set(e.target.value as Environment)}
-                  >
-                    {Object.entries(environments).map(([id, environment]) => (
-                      <option key={id} value={id}>
-                        {environment.label}
-                      </option>
-                    ))}
-                  </select>
+                    onChange={item.set}
+                    options={Object.entries(environments).map(([value, e]) => ({
+                      value: value as Environment,
+                      label: e.label,
+                    }))}
+                  />
                 </label>
               ))}
             </div>
@@ -197,38 +201,34 @@ export function ResearchResponse({
               <div className="simulation-controls">
                 <label>
                   <span>Environment</span>
-                  <select
+                  <SelectMenu
+                    label="Simulation environment"
                     value={scenario.environment}
-                    aria-label="Simulation environment"
-                    onChange={(e) =>
-                      update("environment", e.target.value as Environment)
-                    }
-                  >
-                    {Object.entries(environments).map(([id, e]) => (
-                      <option key={id} value={id}>
-                        {e.label}
-                      </option>
-                    ))}
-                  </select>
+                    onChange={(value) => update("environment", value)}
+                    options={Object.entries(environments).map(([value, e]) => ({
+                      value: value as Environment,
+                      label: e.label,
+                    }))}
+                  />
                 </label>
                 <label>
                   <span>Sample</span>
-                  <select
+                  <SelectMenu
+                    label="Simulation sample"
                     value={scenario.sample}
-                    aria-label="Simulation sample"
-                    onChange={(e) => {
-                      const sample = e.target.value as FlameScenario["sample"];
+                    onChange={(sample) =>
                       setScenario((s) => ({
                         ...s,
                         sample,
                         cool: sample === "droplet" ? s.cool : false,
-                      }));
-                    }}
-                  >
-                    <option value="fabric">Fabric sample</option>
-                    <option value="pmma">PMMA solid</option>
-                    <option value="droplet">Liquid fuel droplet</option>
-                  </select>
+                      }))
+                    }
+                    options={[
+                      { value: "fabric", label: "Fabric sample" },
+                      { value: "pmma", label: "PMMA solid" },
+                      { value: "droplet", label: "Liquid fuel droplet" },
+                    ]}
+                  />
                 </label>
                 {[
                   {

@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { environments, type FlameScenario } from "../lib/flame-scenarios";
+import { flameVertex, flameFragment } from "../lib/flame-shader";
 
 export function FlameScene({
   scenario,
@@ -37,48 +38,45 @@ export function FlameScene({
           return;
         }
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
-        renderer.setClearColor("#f3f7fa");
+        renderer.setClearColor("#101c28");
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(35, 1, 0.1, 100);
         camera.position.set(3, 2.2, 5);
         camera.lookAt(0, 0.35, 0);
-        const grid = new THREE.GridHelper(5, 20, 0xcbdbe6, 0xe0e9ef);
+        const grid = new THREE.GridHelper(5, 20, 0x304b60, 0x1b3042);
         grid.position.y = -1;
         scene.add(grid);
-        const geometry = new THREE.SphereGeometry(1, 32, 24);
-        const outerMaterial = new THREE.MeshBasicMaterial({
-          color: 0x629ecb,
+        const geometry = new THREE.PlaneGeometry(4.8, 4.3);
+        const material = new THREE.ShaderMaterial({
+          vertexShader: flameVertex,
+          fragmentShader: flameFragment,
           transparent: true,
-          opacity: 0.16,
+          premultipliedAlpha: true,
           depthWrite: false,
+          uniforms: {
+            uTime: { value: 0 },
+            uGravity: { value: 0 },
+            uFlow: { value: 0 },
+            uOxygen: { value: 0.21 },
+            uCool: { value: 0 },
+            uAngle: { value: 0 },
+          },
         });
-        const innerMaterial = new THREE.MeshBasicMaterial({
-          color: 0x8dc5eb,
-          transparent: true,
-          opacity: 0.45,
-          depthWrite: false,
-        });
-        const coreMaterial = new THREE.MeshBasicMaterial({ color: 0xe5f4ff });
-        const outer = new THREE.Mesh(geometry, outerMaterial);
-        const inner = new THREE.Mesh(geometry, innerMaterial);
-        const core = new THREE.Mesh(geometry, coreMaterial);
-        const flame = new THREE.Group();
-        flame.add(outer, inner, core);
+        const flame = new THREE.Mesh(geometry, material);
+        flame.position.y = 0.3;
+        flame.quaternion.copy(camera.quaternion);
         scene.add(flame);
-        const fuelMaterial = new THREE.MeshBasicMaterial({ color: 0x6e879a });
+        const fuelMaterial = new THREE.MeshBasicMaterial({ color: 0x637d91 });
         const fuelGeometry = new THREE.BoxGeometry(1.1, 0.06, 0.65);
         const fuel = new THREE.Mesh(fuelGeometry, fuelMaterial);
         fuel.position.y = -0.75;
         scene.add(fuel);
-        const wireGeometry = new THREE.SphereGeometry(1.03, 12, 8);
-        const wireMaterial = new THREE.MeshBasicMaterial({
-          color: 0x93afc3,
-          wireframe: true,
-          transparent: true,
-          opacity: 0.16,
+        const dropletGeometry = new THREE.SphereGeometry(0.13, 20, 16);
+        const dropletMaterial = new THREE.MeshBasicMaterial({
+          color: 0xa9bccb,
         });
-        const wire = new THREE.Mesh(wireGeometry, wireMaterial);
-        flame.add(wire);
+        const droplet = new THREE.Mesh(dropletGeometry, dropletMaterial);
+        scene.add(droplet);
         const resize = () => {
           const width = element.clientWidth,
             height = element.clientHeight;
@@ -115,32 +113,27 @@ export function FlameScene({
         element.addEventListener("pointermove", move);
         element.addEventListener("pointerup", up);
         element.addEventListener("pointercancel", up);
-        // Shape responses are authored illustrations, not a combustion solver or calibrated model.
+        // Procedural volume is visual art, not a heat-transfer or chemical-kinetics solver.
+        let animationTime = 0,
+          lastTime = 0;
         renderer.setAnimationLoop((time) => {
+          const delta = lastTime
+            ? Math.min((time - lastTime) * 0.001, 0.05)
+            : 0;
+          lastTime = time;
           if (!visible || document.hidden) return;
           const { scenario: s, paused: isPaused } = latest.current;
-          const gravity = environments[s.environment].gravityRatio;
-          const flow = s.airflow / 25;
-          const motion =
-            reduced.matches || isPaused ? 0 : Math.sin(time * 0.0018) * 0.035;
-          const height = 1 + gravity * 0.75;
-          const width = 0.72 + flow * 0.22;
-          flame.scale.set(width * (1 + motion), height * (1 - motion), 0.72);
-          flame.rotation.z = -flow * 0.22;
-          flame.rotation.y = angle;
-          flame.position.set(flow * 0.24, gravity * 0.1, 0);
-          outer.scale.set(1, 1, 1);
-          inner.scale.set(0.73, 0.8, 0.73);
-          core.scale.set(0.22, 0.3, 0.22);
-          outerMaterial.opacity = s.cool
-            ? 0.035
-            : 0.14 + (s.oxygen / 100) * 0.16;
-          innerMaterial.opacity = s.cool ? 0.08 : 0.34;
-          innerMaterial.color.set(s.cool ? 0x9ba7b2 : 0x80b8e2);
-          core.visible = !s.cool;
-          wire.visible = s.cool;
+          if (!reduced.matches && !isPaused) animationTime += delta;
+          material.uniforms.uTime.value = animationTime;
+          material.uniforms.uGravity.value =
+            environments[s.environment].gravityRatio;
+          material.uniforms.uFlow.value = s.airflow / 25;
+          material.uniforms.uOxygen.value = s.oxygen / 100;
+          material.uniforms.uCool.value = s.cool ? 1 : 0;
+          material.uniforms.uAngle.value = angle;
           fuel.visible = s.sample !== "droplet";
-          fuel.scale.set(s.sample === "fabric" ? 1 : 0.7, 1, 1);
+          droplet.visible = s.sample === "droplet";
+          fuel.scale.x = s.sample === "fabric" ? 1 : 0.7;
           renderer.render(scene, camera);
         });
         dispose = () => {
@@ -152,13 +145,11 @@ export function FlameScene({
           element.removeEventListener("pointerup", up);
           element.removeEventListener("pointercancel", up);
           geometry.dispose();
+          material.dispose();
           fuelGeometry.dispose();
-          wireGeometry.dispose();
-          outerMaterial.dispose();
-          innerMaterial.dispose();
-          coreMaterial.dispose();
           fuelMaterial.dispose();
-          wireMaterial.dispose();
+          dropletGeometry.dispose();
+          dropletMaterial.dispose();
           grid.geometry.dispose();
           const gridMaterials = Array.isArray(grid.material)
             ? grid.material
