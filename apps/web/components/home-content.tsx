@@ -1,8 +1,9 @@
 "use client";
 import { WordReveal } from "./landing-motion";
 import { FlameArt, Icon } from "./ui";
+import Link from "next/link";
 
-export function HomeContent() { return <><ScienceStory /></>; }
+export function HomeContent() { return <><ScienceStory /><Workflow /></>; }
 function ScienceStory() {
   return <section id="science" className="landing-section science-layout">
     <div><p className="eyebrow">01 / A DIFFERENT KIND OF FIRE</p>
@@ -11,5 +12,17 @@ function ScienceStory() {
       <div className="science-labels mono"><span>EARTH / BUOYANCY</span><Icon name="right" size={16} /><span>SPACE / DIFFUSION</span></div>
     </div>
     <div className="reveal-up"><FlameArt /><p className="science-caption mono">ILLUSTRATED DIFFUSION FIELD · NOT A SIMULATION</p></div>
+  </section>;
+}
+function Workflow() {
+  return <section id="workflow" className="landing-section section-divider">
+    <p className="eyebrow">02 / FROM RESEARCH TO UNDERSTANDING</p><h2>A research desk.<br />With a wider view.</h2>
+    <div className="workflow-grid"><div className="workflow-copy"><p className="section-copy">Bring the conditions, findings and original sources into the same conversation.</p>
+      <ol>{[["01","Find your evidence","Explore programs, materials and experimental conditions."],["02","Connect the conditions","Compare like with like. Keep the limits in view."],["03","Ask a better question","Follow every insight back to its source."]].map(([n,t,d]) => <li key={n}><span className="mono">{n}</span><div><h3>{t}</h3><p>{d}</p></div></li>)}</ol>
+    </div><div className="workspace-preview reveal-up"><div className="preview-top"><span className="mono">FLAMEATLAS / EVIDENCE DESK</span><span className="status-dot" /></div><p className="preview-question">How does airflow affect<br />a flame in microgravity?</p>
+      <div className="preview-step"><Icon name="check" size={14} /> Finding relevant studies <span>03 sources</span></div><div className="preview-step"><Icon name="check" size={14} /> Comparing conditions <span>02 groups</span></div>
+      <div className="preview-answer"><p className="eyebrow">THE CONDITIONS MATTER.</p><p>Start with material, flow direction and oxygen. A result only makes sense alongside the conditions that produced it.</p><div className="preview-cite"><Icon name="file" size={16} /> BASS-II · NASA PSI <Icon name="external" size={14} /></div></div>
+      <Link href="/assistant" className="text-link">Try the demo conversation <Icon name="right" size={16} /></Link>
+    </div></div>
   </section>;
 }
