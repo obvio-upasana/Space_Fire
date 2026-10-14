@@ -2,7 +2,8 @@
 import {useState, type FormEvent} from "react";
 import Link from "next/link";
 import {useRouter} from "next/navigation";
-import {Brand,Icon,FlameArt} from "./ui";
+import {Brand,Icon} from "./ui";
+import {OrbitArt} from "./orbit-art";
 export function AuthScreen({signup=false}:{signup?:boolean}) {
   const [showPassword,setShowPassword]=useState(false);
   const router=useRouter();

@@ -9,6 +9,7 @@ import "./home-footer.css";
 import "./auth.css";
 import "./workspace.css";
 import "./research.css";
+import "./editorial.css";
 import { neue, book, kode } from "./fonts";
 
 export const metadata: Metadata = {

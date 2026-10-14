@@ -17,7 +17,6 @@ export function LandingMotion({children}:{children:ReactNode}) {
       gsap.ticker.add(tick);
       lenis.on("scroll",ScrollTrigger.update);
       gsap.from(".hero-enter",{y:32,opacity:0,duration:.9,stagger:.1,ease:"power3.out",delay:.1});
-      gsap.to(".hero-orbit",{rotation:25,y:-12,duration:7,yoyo:true,repeat:-1,ease:"sine.inOut"});
       gsap.utils.toArray<HTMLElement>(".word-reveal").forEach(element=>{
         gsap.fromTo(element.querySelectorAll(".reveal-word"),{color:"#afbdc7"},{color:"#272b2d",stagger:.15,ease:"none",scrollTrigger:{trigger:element,start:"top 80%",end:"bottom 45%",scrub:1}});
       });
