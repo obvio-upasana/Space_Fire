@@ -1,12 +1,199 @@
 "use client";
-import {useState} from "react";
-import {researchPrograms} from "../../../lib/program-catalog";
-import {sources} from "../../../lib/demo";
-import {PageHeading,Icon,Badge} from "../../../components/ui";
-export default function ProgramsPage(){
- const [query,setQuery]=useState("");const [selected,setSelected]=useState("BASS-II");
- const filtered=researchPrograms.filter(p=>(p.name+" "+p.title+" "+p.focus).toLowerCase().includes(query.toLowerCase()));
- const program=researchPrograms.find(p=>p.name===selected)??researchPrograms[0]!;
- const references=sources.filter(s=>program.sourceIds.includes(s.id));
- return <><PageHeading kicker="THE ORIGINAL RESEARCH" title="Explore the programs." description="Read the investigation, inspect recorded test metadata and follow the original sources."/><div className="program-browser"><aside><label className="program-search"><Icon name="search" size={17}/><input aria-label="Search programs" placeholder="Find a program..." value={query} onChange={e=>setQuery(e.target.value)}/></label><div className="program-selectors">{filtered.map(p=><button key={p.name} onClick={()=>setSelected(p.name)} aria-pressed={selected===p.name} className={selected===p.name?"selected":""}><span>{p.name}</span><small>{p.focus}</small><Icon name="next" size={14}/></button>)}{!filtered.length&&<p className="program-empty">No programs match this search.</p>}</div></aside><section className="program-detail"><div className="program-identity"><div><Badge tone="neutral">{program.platform}</Badge><h2>{program.name}</h2><p className="program-full-title">{program.title}</p></div><a className="button secondary" href={program.url} target="_blank" rel="noreferrer">Original program<Icon name="external" size={16}/></a></div><p className="program-description">{program.description}</p><div className="program-availability"><span className="reference-dot"/>{program.availability}</div><div className="program-section-head"><h3>{program.tests.length?"Recorded test previews":"Available references"}</h3><span>{program.tests.length?"Selected table rows":"Original research links"}</span></div>{program.tests.length?<div className="recorded-tests">{program.tests.map(test=><details key={program.name+test.id}><summary><span className="test-id">TEST {test.id}</span><span><strong>{test.material}</strong><small>{test.date}</small></span><Icon name="plus" size={17}/></summary><dl>{test.fields.map(f=><div key={f.label}><dt>{f.label}</dt><dd>{f.value}</dd></div>)}</dl><p>Values retain the PSI table labels. Display settings are not converted to physical airflow.</p><a href={program.url} target="_blank" rel="noreferrer" className="text-link">Review the complete original record<Icon name="external" size={14}/></a></details>)}</div>:<p className="program-context-note">This selected archive has papers or program context for {program.name}, rather than an experiment table preview.</p>}<div className="program-section-head"><h3>Original sources</h3><span>{references.length} featured reference{references.length===1?"":"s"}</span></div><div className="program-references">{references.map(source=><a key={source.id} href={source.url} target="_blank" rel="noreferrer"><Icon name={source.type==="Dataset"?"database":"file"} size={19}/><div><strong>{source.title}</strong><small>{source.author} · {source.year}</small></div><Icon name="external" size={16}/></a>)}</div><p className="program-metadata-note">Test previews use selected NASA PSI metadata. They are not normalized result tables or safety conclusions.</p></section></div></>;
+import { useState } from "react";
+import { researchPrograms } from "../../../lib/program-catalog";
+import { sources } from "../../../lib/demo";
+import { PageHeading, Icon, Badge } from "../../../components/ui";
+export default function ProgramsPage() {
+  const [query, setQuery] = useState("");
+  const [selected, setSelected] = useState("BASS-II");
+  const filtered = researchPrograms.filter((p) =>
+    (p.name + " " + p.title + " " + p.focus)
+      .toLowerCase()
+      .includes(query.toLowerCase()),
+  );
+  const program =
+    researchPrograms.find((p) => p.name === selected) ?? researchPrograms[0]!;
+  const references = sources.filter((s) => program.sourceIds.includes(s.id));
+  return (
+    <>
+      <PageHeading
+        kicker="THE ORIGINAL RESEARCH"
+        title="Explore the programs."
+        description="Read the investigation, inspect recorded test metadata and follow the original sources."
+      />
+      <div className="program-browser">
+        <aside>
+          <label className="program-search">
+            <Icon name="search" size={17} />
+            <input
+              aria-label="Search programs"
+              placeholder="Find a program..."
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+            />
+          </label>
+          <div className="program-selectors">
+            {filtered.map((p) => (
+              <button
+                key={p.name}
+                onClick={() => setSelected(p.name)}
+                aria-pressed={selected === p.name}
+                className={selected === p.name ? "selected" : ""}
+              >
+                <span>{p.name}</span>
+                <small>{p.focus}</small>
+                <Icon name="next" size={14} />
+              </button>
+            ))}
+            {!filtered.length && (
+              <p className="program-empty">No programs match this search.</p>
+            )}
+          </div>
+        </aside>
+        <section className="program-detail">
+          <div className="program-identity">
+            <div>
+              <Badge tone="neutral">{program.platform}</Badge>
+              <h2>{program.name}</h2>
+              <p className="program-full-title">{program.title}</p>
+            </div>
+            <a
+              className="button secondary"
+              href={program.url}
+              target="_blank"
+              rel="noreferrer"
+            >
+              Original program
+              <Icon name="external" size={16} />
+            </a>
+          </div>
+          <p className="program-description">{program.description}</p>
+          <div className="program-availability">
+            <span className="reference-dot" />
+            {program.availability}
+          </div>
+          <div className="program-section-head">
+            <h3>
+              {program.tests.length
+                ? "Recorded test previews"
+                : "Available references"}
+            </h3>
+            <span>
+              {program.tests.length
+                ? "Selected table rows"
+                : "Original research links"}
+            </span>
+          </div>
+          {program.tests.length ? (
+            <div className="recorded-tests">
+              {program.tests.map((test) => (
+                <details key={program.name + test.id}>
+                  <summary>
+                    <span className="test-id">TEST {test.id}</span>
+                    <span>
+                      <strong>{test.material}</strong>
+                      <small>{test.date}</small>
+                    </span>
+                    <Icon name="plus" size={17} />
+                  </summary>
+                  <dl>
+                    {test.fields.map((f) => (
+                      <div key={f.label}>
+                        <dt>{f.label}</dt>
+                        <dd>{f.value}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                  <p>
+                    Values retain the PSI table labels. Display settings are not
+                    converted to physical airflow.
+                  </p>
+                  <a
+                    href={program.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-link"
+                  >
+                    Review the complete original record
+                    <Icon name="external" size={14} />
+                  </a>
+                </details>
+              ))}
+            </div>
+          ) : (
+            <p className="program-context-note">
+              This selected archive has papers or program context for{" "}
+              {program.name}, rather than an experiment table preview.
+            </p>
+          )}
+          {program.name === "BASS-II" && (
+            <div className="program-data-files">
+              <h3>Data behind this program</h3>
+              <div>
+                <span className="data-format">CSV</span>
+                <p>
+                  Experimental table
+                  <small>
+                    Materials, test settings and recorded conditions
+                  </small>
+                </p>
+              </div>
+              <div>
+                <span className="data-format">XLSX</span>
+                <p>
+                  Fan calibration workbook
+                  <small>
+                    Reference for interpreting fan settings; validation is
+                    required before converting airflow.
+                  </small>
+                </p>
+              </div>
+              <a
+                href={program.url}
+                target="_blank"
+                rel="noreferrer"
+                className="text-link"
+              >
+                Open the original PSI file list
+                <Icon name="external" size={13} />
+              </a>
+            </div>
+          )}
+          <div className="program-section-head">
+            <h3>Original sources</h3>
+            <span>
+              {references.length} featured reference
+              {references.length === 1 ? "" : "s"}
+            </span>
+          </div>
+          <div className="program-references">
+            {references.map((source) => (
+              <a
+                key={source.id}
+                href={source.url}
+                target="_blank"
+                rel="noreferrer"
+              >
+                <Icon
+                  name={source.type === "Dataset" ? "database" : "file"}
+                  size={19}
+                />
+                <div>
+                  <strong>{source.title}</strong>
+                  <small>
+                    {source.author} · {source.year}
+                  </small>
+                </div>
+                <Icon name="external" size={16} />
+              </a>
+            ))}
+          </div>
+          <p className="program-metadata-note">
+            Test previews use selected NASA PSI metadata. They are not
+            normalized result tables or safety conclusions.
+          </p>
+        </section>
+      </div>
+    </>
+  );
 }
