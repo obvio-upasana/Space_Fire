@@ -1,6 +1,99 @@
 import Link from "next/link";
-import {PageHeading,Icon} from "../../../components/ui";
-export default function TrustPage(){
- const checks=[["Original references","Source cards point to NASA PSI, NTRS or NASA program pages."],["Conditions before conclusions","Material, geometry, flow direction, oxygen, pressure and gravity belong beside every finding."],["Comparable groups","Different materials and scales do not become one unqualified ranking."],["Visible evidence gaps","A missing file or untested mission setting stays missing. It is not filled with a model-generated number."]];
- return <><PageHeading kicker="KNOW WHAT YOU CAN TRUST" title="Evidence before confidence." description="A useful research tool keeps its sources, assumptions and limits in view."/><div className="research-split"><section><h2 className="section-title">What this interface does today</h2><p className="trust-copy">This is a static frontend prototype. The research desk uses scripted responses, its activity steps are simulated, and quantitative experiment previews use synthetic fixtures. It does not run live AI, retrieval, OCR, database queries or a validated fire-safety model.</p><p className="trust-copy">Original NASA links are real reference destinations. A reference link is not proof that a generated response or synthetic number was extracted from that source.</p><h2 className="section-title" style={{marginTop:40}}>The rules behind the product</h2><div className="trust-rules">{checks.map(([title,description],index)=><div key={title}><span className="mono">0{index+1}</span><div><h3>{title}</h3><p>{description}</p></div></div>)}</div></section><aside className="panel"><p className="eyebrow">ARCHIVE SNAPSHOT</p><h2>Selected evidence.</h2><dl className="detail-conditions"><div><dt>Source records</dt><dd>38</dd></div><div><dt>Featured original PDFs</dt><dd>23</dd></div><div><dt>PSI investigations</dt><dd>2 selected</dd></div><div><dt>Snapshot</dt><dd style={{fontSize:15}}>12 Oct 2026</dd></div></dl><p className="field-note">The BASS-II ReadMe and test matrix, and the BASS final report, returned 404 during collection. Large raw media were excluded. OCR and result-table validation remain future work.</p><Link href="/sources" className="text-link" style={{marginTop:24}}>Inspect original sources <Icon name="right" size={15}/></Link></aside></div><div className="trust-end"><Icon name="shield" size={20}/><p>Use the prototype to explore the interface and research workflow. It is not operational fire-safety guidance or a NASA-endorsed product.</p></div></>;
+import { PageHeading, Icon } from "../../../components/ui";
+export default function TrustPage() {
+  const checks = [
+    [
+      "Original references",
+      "Source cards point to NASA PSI, NTRS or NASA program pages.",
+    ],
+    [
+      "Conditions before conclusions",
+      "Material, geometry, flow direction, oxygen, pressure and gravity belong beside every finding.",
+    ],
+    [
+      "Comparable groups",
+      "Different materials and scales do not become one unqualified ranking.",
+    ],
+    [
+      "Visible evidence gaps",
+      "A missing file or untested mission setting stays missing. It is not filled with a model-generated number.",
+    ],
+  ];
+  return (
+    <>
+      <PageHeading
+        kicker="KNOW WHAT YOU CAN TRUST"
+        title="Evidence before confidence."
+        description="A useful research tool keeps its sources, assumptions and limits in view."
+      />
+      <div className="research-split">
+        <section>
+          <h2 className="section-title">What this interface does today</h2>
+          <p className="trust-copy">
+            This is a static frontend prototype. The research desk uses scripted
+            responses, its activity steps are simulated, and program previews
+            display selected original PSI test metadata. It does not run live
+            AI, retrieval, OCR, database queries or a validated fire-safety
+            model.
+          </p>
+          <p className="trust-copy">
+            Original NASA links are real reference destinations. Review each
+            original source for measured results. The chat responses are
+            illustrative and have not been checked against extracted passages.
+          </p>
+          <h2 className="section-title" style={{ marginTop: 40 }}>
+            The rules behind the product
+          </h2>
+          <div className="trust-rules">
+            {checks.map(([title, description], index) => (
+              <div key={title}>
+                <span className="mono">0{index + 1}</span>
+                <div>
+                  <h3>{title}</h3>
+                  <p>{description}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+        <aside className="panel">
+          <p className="eyebrow">ARCHIVE SNAPSHOT</p>
+          <h2>Selected evidence.</h2>
+          <dl className="detail-conditions">
+            <div>
+              <dt>Source records</dt>
+              <dd>38</dd>
+            </div>
+            <div>
+              <dt>Featured original PDFs</dt>
+              <dd>23</dd>
+            </div>
+            <div>
+              <dt>PSI investigations</dt>
+              <dd>2 selected</dd>
+            </div>
+            <div>
+              <dt>Snapshot</dt>
+              <dd style={{ fontSize: 15 }}>12 Oct 2026</dd>
+            </div>
+          </dl>
+          <p className="field-note">
+            The BASS-II ReadMe and test matrix, and the BASS final report,
+            returned 404 during collection. Large raw media were excluded. OCR
+            and result-table validation remain future work.
+          </p>
+          <Link href="/sources" className="text-link" style={{ marginTop: 24 }}>
+            Inspect original sources <Icon name="right" size={15} />
+          </Link>
+        </aside>
+      </div>
+      <div className="trust-end">
+        <Icon name="shield" size={20} />
+        <p>
+          Use the prototype to explore the interface and research workflow. It
+          is not operational fire-safety guidance or a NASA-endorsed product.
+        </p>
+      </div>
+    </>
+  );
 }
