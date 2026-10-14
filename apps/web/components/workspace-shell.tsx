@@ -89,18 +89,6 @@ export function WorkspaceShell({ children }: { children: ReactNode }) {
             </Link>
           ))}
         </nav>
-        <div className="sidebar-context">
-          <p>Research collection</p>
-          <Link href="/programs">
-            BASS-II <span>PSI-25</span>
-          </Link>
-          <Link href="/programs">
-            BASS <span>PSI-26</span>
-          </Link>
-          <Link href="/sources">
-            NASA publications <Icon name="external" size={13} />
-          </Link>
-        </div>
         <div className="sidebar-bottom">
           <Link
             href="/trust"
