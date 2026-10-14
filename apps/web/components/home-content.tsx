@@ -1,50 +1,57 @@
 "use client";
-import { WordReveal } from "./landing-motion";
-import { FlameArt, Icon, Brand, ButtonLink } from "./ui";
 import Link from "next/link";
-import { programs } from "../lib/demo";
+import { WordReveal } from "./landing-motion";
+import { Icon, Brand, ButtonLink } from "./ui";
+import { OrbitArt } from "./orbit-art";
 
-export function HomeContent() { return <><ScienceStory /><Workflow /><Archive /><Questions /><HomeFooter /></>; }
+export function HomeContent() {
+  return <><ScienceStory /><Workflow /><Archive /><Questions /><HomeFooter /></>;
+}
+
 function ScienceStory() {
-  return <section id="science" className="landing-section science-layout">
-    <div><p className="eyebrow">01 / A DIFFERENT KIND OF FIRE</p>
-      <WordReveal text="Take away gravity. Change everything we know about a flame." />
-      <p className="section-copy">On Earth, hot air rises. In microgravity, a flame follows different rules. Material, oxygen and ventilation become a story worth understanding together.</p>
-      <div className="science-labels mono"><span>EARTH / BUOYANCY</span><Icon name="right" size={16} /><span>SPACE / DIFFUSION</span></div>
-    </div>
-    <div className="reveal-up"><FlameArt /><p className="science-caption mono">ILLUSTRATED DIFFUSION FIELD · NOT A SIMULATION</p></div>
+  return <section id="science" className="landing-section science-story">
+    <p className="eyebrow">WHY WE’RE BUILDING</p>
+    <WordReveal text="A flame changes in space. Our understanding should follow." />
+    <p className="section-copy">Decades of experiments tell us how fire behaves beyond Earth. FlameAtlas brings their findings, conditions and original sources into one place to explore.</p>
+    <OrbitArt />
+    <p className="mono">A DIFFERENT ENVIRONMENT. A BETTER QUESTION.</p>
   </section>;
 }
+
 function Workflow() {
-  return <section id="workflow" className="landing-section section-divider">
-    <p className="eyebrow">02 / FROM RESEARCH TO UNDERSTANDING</p><h2>A research desk.<br />With a wider view.</h2>
-    <div className="workflow-grid"><div className="workflow-copy"><p className="section-copy">Bring the conditions, findings and original sources into the same conversation.</p>
-      <ol>{[["01","Find your evidence","Explore programs, materials and experimental conditions."],["02","Connect the conditions","Compare like with like. Keep the limits in view."],["03","Ask a better question","Follow every insight back to its source."]].map(([n,t,d]) => <li key={n}><span className="mono">{n}</span><div><h3>{t}</h3><p>{d}</p></div></li>)}</ol>
-    </div><div className="workspace-preview reveal-up"><div className="preview-top"><span className="mono">FLAMEATLAS / EVIDENCE DESK</span><span className="status-dot" /></div><p className="preview-question">How does airflow affect<br />a flame in microgravity?</p>
-      <div className="preview-step"><Icon name="check" size={14} /> Finding relevant studies <span>03 sources</span></div><div className="preview-step"><Icon name="check" size={14} /> Comparing conditions <span>02 groups</span></div>
-      <div className="preview-answer"><p className="eyebrow">THE CONDITIONS MATTER.</p><p>Start with material, flow direction and oxygen. A result only makes sense alongside the conditions that produced it.</p><div className="preview-cite"><Icon name="file" size={16} /> BASS-II · NASA PSI <Icon name="external" size={14} /></div></div>
-      <Link href="/assistant" className="text-link">Try the demo conversation <Icon name="right" size={16} /></Link>
-    </div></div>
+  return <section id="workflow" className="landing-section editorial-workflow">
+    <div><p className="eyebrow">A WAY THROUGH THE RESEARCH</p><h2>From a question<br />to a clearer view.</h2><p className="section-copy">Ask about a material, a mission or a condition. Follow the evidence. Keep what helps your research.</p></div>
+    <dl className="interface-list">
+      <div><dt><span>01</span><Link href="/assistant">Ask the evidence <Icon name="right" size={16} /></Link></dt><dd>Find relevant experiments and read a response with the source alongside it.</dd></div>
+      <div><dt><span>02</span><Link href="/compare">Compare the conditions <Icon name="right" size={16} /></Link></dt><dd>Put two studies together. See what matches, what differs and what needs a closer look.</dd></div>
+      <div><dt><span>03</span><Link href="/notes">Keep a research note <Icon name="right" size={16} /></Link></dt><dd>Save a response, keep the references and build on the next question.</dd></div>
+    </dl>
   </section>;
 }
-function Questions() {
-  const questions=[
-    ["Is this an official NASA product?","No. FlameAtlas is an independent NASA Space Apps concept. Original research links point to NASA sources; NASA has not endorsed this interface."],
-    ["What can I explore in this demo?","Browse experiments, compare illustrative conditions, explore a mission matcher and try a scripted evidence conversation. Analysis values in the interface are synthetic demo fixtures."],
-    ["Can I trace an answer to its source?","Source cards link to original NASA investigations or reports. Citations illustrate the intended workflow; demo answers are not produced by live retrieval."],
-    ["Does microgravity evidence apply directly to the Moon?","No. Lunar and Martian gravity are different conditions. A useful comparison keeps gravity, oxygen, pressure, materials and geometry in view."],
-  ];
-  return <section className="landing-section faq-section section-divider"><div><p className="eyebrow">04 / A FEW GOOD QUESTIONS</p><h2>Keep the curiosity.<br />Know the limits.</h2><p className="section-copy">Science starts with a question.<br />Trust starts with knowing what we can answer.</p></div><div className="faq-list">{questions.map(([q,a])=><details key={q}><summary>{q}<Icon name="plus" size={18}/></summary><p>{a}</p></details>)}</div></section>;
-}
-function HomeFooter() {return <><section className="home-cta"><div className="landing-section"><p className="mono">YOUR NEXT QUESTION STARTS HERE.</p><h2>A little more evidence.<br />A much clearer view.</h2><ButtonLink href="/dashboard">Open your research desk</ButtonLink></div></section><footer className="home-footer"><div><Brand/><p>Understanding fire. Beyond Earth.</p></div><div><Link href="/sources">Original sources</Link><Link href="/trust">Evidence & limits</Link><Link href="/login">Enter workspace <Icon name="external" size={14}/></Link></div><p className="mono">NASA SPACE APPS CONCEPT · 2026<br/>STATIC FRONTEND DEMONSTRATION</p></footer></>;}
+
 function Archive() {
-  return <section id="programs" className="landing-section section-divider">
-    <div className="archive-heading"><div><p className="eyebrow">03 / MANY EXPERIMENTS. ONE ATLAS.</p><h2>A constellation<br />of discovery.</h2></div><p className="section-copy">From a single droplet to a spacecraft-scale fire. Follow the experiments that help us ask what happens next.</p></div>
-    <div className="home-program-grid">{programs.slice(0,4).map((program,index) => <Link href="/programs" className={`home-program ${program.color} reveal-up`} key={program.name}>
-      <div className="row-between"><span className="mono">0{index+1} / {program.platform.toUpperCase()}</span><Icon name="external" size={18}/></div>
-      <div className="program-glyph"><Icon name={index===0?"fire":index===1?"flask":index===2?"rocket":"atom"} size={56}/></div>
-      <h3>{program.name}</h3><p>{program.topic}</p><span className="program-years mono">{program.years}</span>
-    </Link>)}</div><Link href="/programs" className="text-link">Explore the full program map <Icon name="right" size={17}/></Link>
-    <div className="archive-proof"><p className="mono">BUILT AROUND ORIGINAL EVIDENCE</p><div><span>NASA PSI</span><span>NASA NTRS</span><span>ISS RESEARCH</span><span>OPEN SCIENCE</span></div></div>
+  const programs = [
+    ["01 / SOLID MATERIALS", "BASS & BASS-II", "Material, geometry and ventilation. A closer look at how solid fuels burn and stop burning in microgravity."],
+    ["02 / AT SPACECRAFT SCALE", "Saffire", "From a small sample to a larger fire. Explore what scale and an enclosed spacecraft change."],
+    ["03 / IGNITION & EXTINCTION", "SoFIE", "Research into when solid fuels ignite, how flames develop and the conditions that extinguish them."],
+    ["04 / FOLLOW THE SIGNAL", "FLEX & SAME", "Droplet combustion and smoke detection. Different experiments, different pieces of the fire-safety picture."],
+  ];
+  return <section id="programs" className="landing-section editorial-archive">
+    <p className="eyebrow">THE EXPERIMENTS BEHIND THE QUESTIONS</p><h2>Different studies.<br />A shared frontier.</h2>
+    <div className="program-editorial-list">{programs.map(([label,name,description]) => <Link href="/programs" key={name}><span className="mono">{label}</span><h3>{name}<Icon name="external" size={20} /></h3><p>{description}</p></Link>)}</div>
+    <Link href="/sources" className="text-link">Read the original research <Icon name="right" size={16} /></Link>
   </section>;
+}
+
+function Questions() {
+  const questions = [
+    ["Where does the research come from?", "NASA’s Physical Sciences Informatics repository, NASA Technical Reports Server and original program publications. Every source keeps its original reference."],
+    ["What can I ask?", "Start with materials, oxygen, ventilation or gravity. You can ask for a comparison, a mission-condition match or an explanation of a research finding."],
+    ["Does an ISS result apply directly to the Moon?", "The environment matters. Lunar and Martian gravity, oxygen, pressure and material geometry need to be considered separately. The workspace keeps those differences in view."],
+  ];
+  return <section className="landing-section faq-section"><div><p className="eyebrow">BEFORE YOUR FIRST QUESTION</p><h2>Stay curious.<br />Follow the source.</h2></div><div className="faq-list">{questions.map(([question,answer]) => <details key={question}><summary>{question}<Icon name="plus" size={18} /></summary><p>{answer}</p></details>)}</div></section>;
+}
+
+function HomeFooter() {
+  return <><section className="home-cta"><div className="landing-section"><p className="mono">A LITTLE MORE EVIDENCE.</p><h2>What would you<br />like to understand?</h2><ButtonLink href="/assistant">Open FlameAtlas</ButtonLink></div></section><footer className="home-footer"><div><Brand /><p>Understanding fire. Beyond Earth.</p></div><div><Link href="/sources">Original research</Link><Link href="/trust">Evidence & limits</Link><Link href="/login">Enter workspace <Icon name="external" size={14} /></Link></div><p className="mono">INDEPENDENT NASA SPACE APPS CONCEPT<br />2026</p></footer></>;
 }
