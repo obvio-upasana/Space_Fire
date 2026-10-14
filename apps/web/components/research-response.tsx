@@ -4,6 +4,10 @@ import { FlameScene } from "./flame-scene";
 import { Icon } from "./ui";
 import { SelectMenu } from "./select-menu";
 import {
+  verifiedConditions,
+  conditionProvenance,
+} from "../lib/verified-conditions";
+import {
   defaultScenario,
   environments,
   physicsReferences,
@@ -26,16 +30,24 @@ export function ResearchResponse({
   const [view, setView] = useState<View>(initialView);
   const [scenario, setScenario] = useState<FlameScenario>({
     ...defaultScenario,
-    ...(cool ? { sample: "droplet" as const, cool: true } : {}),
+    ...(cool
+      ? { environment: "iss" as const, sample: "droplet" as const, cool: true }
+      : {}),
   });
   const [paused, setPaused] = useState(false);
+  const [recordId, setRecordId] = useState("visual");
+  const record = verifiedConditions.find((row) => row["Test #"] === recordId);
   const [left, setLeft] = useState<Environment>("moon");
   const [right, setRight] = useState<Environment>("mars");
   function update<K extends keyof FlameScenario>(
     key: K,
     value: FlameScenario[K],
   ) {
-    setScenario((s) => ({ ...s, [key]: value }));
+    setScenario((s) => ({
+      ...s,
+      [key]: value,
+      ...(key === "environment" && value !== "iss" ? { cool: false } : {}),
+    }));
   }
   const compare = initialView === "comparison";
   const tabs: { id: View; label: string }[] = [
@@ -182,10 +194,62 @@ export function ResearchResponse({
         )}
         {view === "simulation" && (
           <div className="simulation-panel">
+            <div className="simulation-presets">
+              <span>Research context</span>
+              <SelectMenu
+                label="Research record"
+                value={recordId}
+                options={[
+                  { value: "visual", label: "Visual exploration" },
+                  ...verifiedConditions.map((row) => ({
+                    value: row["Test #"],
+                    label: "BASS-II · " + row["Test #"],
+                  })),
+                ]}
+                onChange={(id) => {
+                  setRecordId(id);
+                  const selected = verifiedConditions.find(
+                    (row) => row["Test #"] === id,
+                  );
+                  setScenario(
+                    selected
+                      ? {
+                          ...defaultScenario,
+                          environment: "iss",
+                          sample: selected["Fuel Sample Material"].includes(
+                            "Nomex",
+                          )
+                            ? "fabric"
+                            : "pmma",
+                          oxygen: Number(
+                            selected["Calibrated  initial O2 % by vol"],
+                          ),
+                          airflow: 0,
+                          cool: false,
+                        }
+                      : defaultScenario,
+                  );
+                }}
+              />
+              <span className="preset-state">
+                {record
+                  ? scenario.oxygen ===
+                    Number(record["Calibrated  initial O2 % by vol"])
+                    ? "Record-linked initial oxygen"
+                    : "Edited oxygen · original record below"
+                  : "Editable illustration inputs"}
+              </span>
+            </div>
             <div className="simulation-heading">
               <div>
-                <h2>Explore the conditions.</h2>
-                <p>Interactive 3D illustration · no calculated safety limits</p>
+                <h2>
+                  {scenario.cool
+                    ? "After visible extinction"
+                    : scenario.sample === "droplet"
+                      ? "Droplet combustion"
+                      : "Solid-fuel flame"}
+                </h2>
+                <p>Research-informed visual study · not a numerical solver</p>
               </div>
               <button
                 type="button"
@@ -264,6 +328,7 @@ export function ResearchResponse({
                     <input
                       type="range"
                       aria-label={control.label}
+                      step={control.key === "pressure" ? 1 : 0.1}
                       min={control.min}
                       max={control.max}
                       value={scenario[control.key]}
@@ -277,17 +342,19 @@ export function ResearchResponse({
                   <input
                     type="checkbox"
                     checked={scenario.cool}
-                    onChange={(e) =>
+                    onChange={(e) => {
+                      setRecordId("visual");
                       setScenario((s) => ({
                         ...s,
                         cool: e.target.checked,
                         sample: e.target.checked ? "droplet" : s.sample,
-                      }))
-                    }
+                        environment: e.target.checked ? "iss" : s.environment,
+                      }));
+                    }}
                   />
                   <span>
                     Cool-flame concept
-                    <small>Switches to a liquid fuel droplet</small>
+                    <small>FLEX concept · switches to an ISS droplet</small>
                   </span>
                 </label>
                 <button
@@ -295,12 +362,62 @@ export function ResearchResponse({
                   className="simulation-reset"
                   onClick={() => {
                     setScenario(defaultScenario);
+                    setRecordId("visual");
                     setPaused(false);
                   }}
                 >
                   Reset conditions
                 </button>
               </div>
+            </div>
+            <div className="simulation-evidence">
+              <div>
+                <p className="eyebrow">INPUT PROVENANCE</p>
+                <h3>
+                  {record
+                    ? "BASS-II record " + record["Test #"]
+                    : "Visual exploration"}
+                </h3>
+                <p>
+                  {record
+                    ? record["Fuel Sample Material"]
+                    : "The controls describe a chosen scenario. They are not measured NASA habitat settings."}
+                </p>
+              </div>
+              {record && (
+                <dl>
+                  <div>
+                    <dt>Initial oxygen · CSV</dt>
+                    <dd>{record["Calibrated  initial O2 % by vol"]}%</dd>
+                  </div>
+                  <div>
+                    <dt>Fan display · raw</dt>
+                    <dd>{record["Fan display"]}</dd>
+                  </div>
+                  <div>
+                    <dt>Air display · raw</dt>
+                    <dd>{record["Air display"]}</dd>
+                  </div>
+                  <div>
+                    <dt>Restrictors · CSV</dt>
+                    <dd>{record["Flow restrictor"]}</dd>
+                  </div>
+                </dl>
+              )}
+              <p className="input-assumptions">
+                Pressure and physical airflow remain editable assumptions. CSV
+                fan and air display readings are retained as raw values; they
+                are not converted to cm/s in this view.
+              </p>
+              <a
+                href={conditionProvenance.investigation}
+                target="_blank"
+                rel="noreferrer"
+                className="text-link"
+              >
+                Review the original data
+                <Icon name="external" size={13} />
+              </a>
             </div>
             <div className="simulation-reading">
               <h3>
@@ -312,16 +429,17 @@ export function ResearchResponse({
               </h3>
               <p>
                 {scenario.cool
-                  ? "FLEX observed continued low-temperature droplet combustion after visible flame extinction. The faint shell marks a concept; it does not model reaction chemistry."
+                  ? "FLEX observed continued low-temperature droplet combustion after visible flame extinction. The visible flame is removed in this view; continued chemistry is not modeled."
                   : scenario.environment === "iss"
                     ? "Without ordinary buoyant circulation, forced ventilation and diffusion matter. This view illustrates geometry changes; it does not predict spread speed or extinction."
                     : "Moon and Mars gravity differ. A shape illustration cannot establish the flammability of a material under those conditions."}
               </p>
               <p className="simulation-limit">
-                Oxygen, pressure and airflow are user-selected inputs. Pressure
-                is recorded for context; no transport, heat transfer or reaction
-                kinetics are solved. Material-specific behavior requires
-                validated experiment data.
+                Oxygen and pressure are context inputs, with no calibrated
+                visual effect. Airflow changes the illustrative plume geometry,
+                not a measured burn rate or color threshold. No transport, heat
+                transfer or reaction kinetics are solved. Material-specific
+                behavior requires validated experiment data.
               </p>
               <a
                 href={

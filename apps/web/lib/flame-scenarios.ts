@@ -18,10 +18,10 @@ export const environments: Record<
   earth: { label: "Earth reference", gravity: "1 g", gravityRatio: 1 },
 };
 export const defaultScenario: FlameScenario = {
-  environment: "iss",
+  environment: "earth",
   oxygen: 21,
   pressure: 101,
-  airflow: 5,
+  airflow: 0,
   sample: "fabric",
   cool: false,
 };

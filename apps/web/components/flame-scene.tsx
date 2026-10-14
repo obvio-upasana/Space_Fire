@@ -1,8 +1,29 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { environments, type FlameScenario } from "../lib/flame-scenarios";
-import { flameVertex, flameFragment } from "../lib/flame-shader";
-
+import { Icon } from "./ui";
+const shellVertex = `
+varying vec3 vNormal;
+varying vec3 vView;
+void main(){
+ vec4 world=modelMatrix*vec4(position,1.0);
+ vNormal=normalize(mat3(modelMatrix)*normal);
+ vView=cameraPosition-world.xyz;
+ gl_Position=projectionMatrix*viewMatrix*world;
+}
+`;
+const shellFragment = `
+varying vec3 vNormal;
+varying vec3 vView;
+uniform float uTime,uFlow,uOpacity;
+void main(){
+ float rim=pow(1.0-abs(dot(normalize(vNormal),normalize(vView))),2.5);
+ float ripple=1.0+sin(vNormal.y*14.0+uTime*.4)*.015;
+ float alpha=clamp(rim*uOpacity*ripple,0.0,.8);
+ vec3 color=mix(vec3(.07,.23,.65),vec3(.13,.62,1.0),rim);
+ gl_FragColor=vec4(color,alpha);
+}
+`;
 export function FlameScene({
   scenario,
   paused = false,
@@ -10,8 +31,10 @@ export function FlameScene({
   scenario: FlameScenario;
   paused?: boolean;
 }) {
-  const canvas = useRef<HTMLCanvasElement>(null);
-  const latest = useRef({ scenario, paused });
+  const canvas = useRef<HTMLCanvasElement>(null),
+    stage = useRef<HTMLDivElement>(null);
+  const latest = useRef({ scenario, paused }),
+    resetCamera = useRef<(() => void) | null>(null);
   const [error, setError] = useState("");
   useEffect(() => {
     latest.current = { scenario, paused };
@@ -21,61 +44,86 @@ export function FlameScene({
     if (!element) return;
     let stopped = false;
     let dispose: (() => void) | undefined;
-    import("three")
-      .then((THREE) => {
+    Promise.all([
+      import("three"),
+      import("three/addons/controls/OrbitControls.js"),
+      import("@wolffo/three-fire/vanilla"),
+    ])
+      .then(([THREE, { OrbitControls }, { FireMesh }]) => {
         if (stopped) return;
         let renderer: InstanceType<typeof THREE.WebGLRenderer>;
         try {
           renderer = new THREE.WebGLRenderer({
             canvas: element,
             antialias: true,
-            alpha: false,
           });
         } catch {
           setError(
-            "3D is unavailable in this browser. The parameter controls and explanations still work.",
+            "WebGL is unavailable. The research context and controls remain available.",
           );
           return;
         }
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
         renderer.setClearColor("#101c28");
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(35, 1, 0.1, 100);
-        camera.position.set(3, 2.2, 5);
-        camera.lookAt(0, 0.35, 0);
-        const grid = new THREE.GridHelper(5, 20, 0x304b60, 0x1b3042);
-        grid.position.y = -1;
+        const scene = new THREE.Scene(),
+          camera = new THREE.PerspectiveCamera(40, 1, 0.1, 50);
+        camera.position.set(2.8, 1.5, 4.8);
+        const controls = new OrbitControls(camera, element);
+        controls.target.set(0, 0.2, 0);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.08;
+        controls.minDistance = 2.3;
+        controls.maxDistance = 9;
+        controls.maxPolarAngle = Math.PI * 0.56;
+        controls.update();
+        controls.saveState();
+        resetCamera.current = () => controls.reset();
+        const grid = new THREE.GridHelper(5, 10, 0x294153, 0x182d3d);
+        grid.position.y = -0.8;
         scene.add(grid);
-        const geometry = new THREE.PlaneGeometry(4.8, 4.3);
-        const material = new THREE.ShaderMaterial({
-          vertexShader: flameVertex,
-          fragmentShader: flameFragment,
+        const texture = new THREE.TextureLoader().load(
+          "/fire-density.png",
+          undefined,
+          undefined,
+          () => {
+            if (!stopped) setError("The fire density texture could not load.");
+          },
+        );
+        const plume = new FireMesh({
+          fireTex: texture,
+          color: 0xff8a2d,
+          iterations: window.innerWidth < 760 ? 24 : 40,
+          octaves: 3,
+          magnitude: 1.1,
+          noiseScale: [1, 2, 1, 0.3],
+        });
+        plume.position.y = 0.3;
+        scene.add(plume);
+        const shellGeometry = new THREE.SphereGeometry(0.64, 64, 40);
+        const shellMaterial = new THREE.ShaderMaterial({
+          vertexShader: shellVertex,
+          fragmentShader: shellFragment,
           transparent: true,
-          premultipliedAlpha: true,
           depthWrite: false,
+          side: THREE.DoubleSide,
           uniforms: {
             uTime: { value: 0 },
-            uGravity: { value: 0 },
             uFlow: { value: 0 },
-            uOxygen: { value: 0.21 },
-            uCool: { value: 0 },
-            uAngle: { value: 0 },
+            uOpacity: { value: 0.7 },
           },
         });
-        const flame = new THREE.Mesh(geometry, material);
-        flame.position.y = 0.3;
-        flame.quaternion.copy(camera.quaternion);
-        scene.add(flame);
-        const fuelMaterial = new THREE.MeshBasicMaterial({ color: 0x637d91 });
-        const fuelGeometry = new THREE.BoxGeometry(1.1, 0.06, 0.65);
+        const shell = new THREE.Mesh(shellGeometry, shellMaterial);
+        shell.position.y = 0.3;
+        scene.add(shell);
+        const fuelGeometry = new THREE.BoxGeometry(1.05, 0.06, 0.65),
+          fuelMaterial = new THREE.MeshBasicMaterial({ color: 0x698399 });
         const fuel = new THREE.Mesh(fuelGeometry, fuelMaterial);
-        fuel.position.y = -0.75;
+        fuel.position.y = -0.74;
         scene.add(fuel);
-        const dropletGeometry = new THREE.SphereGeometry(0.13, 20, 16);
-        const dropletMaterial = new THREE.MeshBasicMaterial({
-          color: 0xa9bccb,
-        });
+        const dropletGeometry = new THREE.SphereGeometry(0.07, 24, 20),
+          dropletMaterial = new THREE.MeshBasicMaterial({ color: 0xb9cbd8 });
         const droplet = new THREE.Mesh(dropletGeometry, dropletMaterial);
+        droplet.position.y = 0.3;
         scene.add(droplet);
         const resize = () => {
           const width = element.clientWidth,
@@ -87,81 +135,69 @@ export function FlameScene({
         const observer = new ResizeObserver(resize);
         observer.observe(element);
         resize();
-        const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
         let visible = true;
         const visibility = new IntersectionObserver((entries) => {
           visible = entries[0]?.isIntersecting ?? false;
         });
         visibility.observe(element);
-        let angle = 0;
-        const drag = { down: false, x: 0 };
-        const down = (event: PointerEvent) => {
-          drag.down = true;
-          drag.x = event.clientX;
-          element.setPointerCapture(event.pointerId);
-        };
-        const move = (event: PointerEvent) => {
-          if (drag.down) {
-            angle += (event.clientX - drag.x) * 0.008;
-            drag.x = event.clientX;
-          }
-        };
-        const up = () => {
-          drag.down = false;
-        };
-        element.addEventListener("pointerdown", down);
-        element.addEventListener("pointermove", move);
-        element.addEventListener("pointerup", up);
-        element.addEventListener("pointercancel", up);
-        // Procedural volume is visual art, not a heat-transfer or chemical-kinetics solver.
-        let animationTime = 0,
+        const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
+        let time = 0,
           lastTime = 0;
-        renderer.setAnimationLoop((time) => {
-          const delta = lastTime
-            ? Math.min((time - lastTime) * 0.001, 0.05)
-            : 0;
-          lastTime = time;
+        renderer.setAnimationLoop((now) => {
+          const delta = lastTime ? Math.min((now - lastTime) * 0.001, 0.05) : 0;
+          lastTime = now;
           if (!visible || document.hidden) return;
           const { scenario: s, paused: isPaused } = latest.current;
-          if (!reduced.matches && !isPaused) animationTime += delta;
-          material.uniforms.uTime.value = animationTime;
-          material.uniforms.uGravity.value =
-            environments[s.environment].gravityRatio;
-          material.uniforms.uFlow.value = s.airflow / 25;
-          material.uniforms.uOxygen.value = s.oxygen / 100;
-          material.uniforms.uCool.value = s.cool ? 1 : 0;
-          material.uniforms.uAngle.value = angle;
+          if (!isPaused && !reduced.matches) time += delta;
+          const gravity = environments[s.environment].gravityRatio,
+            flow = s.airflow / 25;
+          const spherical = s.environment === "iss" && s.sample === "droplet";
+          plume.visible = !spherical && !s.cool;
+          shell.visible = spherical && !s.cool;
+          plume.scale.set(0.85 + flow * 0.18, 0.95 + gravity * 0.3, 0.85);
+          plume.position.y = -0.72 + plume.scale.y * 0.5;
+          plume.rotation.z = -flow * 0.25;
+          // Color is an illustrative style, not a calibrated airflow threshold.
+          plume.fireColor.set(0xffa341);
+          plume.magnitude = 0.65 + gravity * 0.55 + flow * 0.2;
+          plume.update(time);
+          shell.scale.set(1 + flow * 0.25, 1, 1);
+          shellMaterial.uniforms.uTime.value = time;
+          shellMaterial.uniforms.uOpacity.value = 0.65;
           fuel.visible = s.sample !== "droplet";
-          droplet.visible = s.sample === "droplet";
           fuel.scale.x = s.sample === "fabric" ? 1 : 0.7;
+          droplet.visible = s.sample === "droplet";
+          // A schematic shrink cycle communicates evaporation, without claiming a measured burn rate.
+          droplet.scale.setScalar(s.cool ? 1 - (time % 12) / 24 : 1);
+          controls.update();
           renderer.render(scene, camera);
         });
         dispose = () => {
           renderer.setAnimationLoop(null);
+          controls.dispose();
+          resetCamera.current = null;
           observer.disconnect();
           visibility.disconnect();
-          element.removeEventListener("pointerdown", down);
-          element.removeEventListener("pointermove", move);
-          element.removeEventListener("pointerup", up);
-          element.removeEventListener("pointercancel", up);
-          geometry.dispose();
-          material.dispose();
+          plume.dispose();
+          texture.dispose();
+          shellGeometry.dispose();
+          shellMaterial.dispose();
           fuelGeometry.dispose();
           fuelMaterial.dispose();
           dropletGeometry.dispose();
           dropletMaterial.dispose();
           grid.geometry.dispose();
-          const gridMaterials = Array.isArray(grid.material)
+          (Array.isArray(grid.material)
             ? grid.material
-            : [grid.material];
-          gridMaterials.forEach((m) => m.dispose());
+            : [grid.material]
+          ).forEach((m) => m.dispose());
           renderer.dispose();
         };
       })
       .catch(() => {
         if (!stopped)
           setError(
-            "The 3D preview could not load. You can still inspect the controls and research context.",
+            "The 3D scene could not load. Research details remain available.",
           );
       });
     return () => {
@@ -170,18 +206,61 @@ export function FlameScene({
     };
   }, []);
   return (
-    <div className="flame-scene">
+    <div
+      ref={stage}
+      className={scenario.cool ? "flame-scene cool-view" : "flame-scene"}
+    >
       <canvas
         ref={canvas}
-        aria-label={`Illustrative flame view for ${environments[scenario.environment].label}. Drag to rotate.`}
+        aria-label={
+          "Interactive flame illustration for " +
+          environments[scenario.environment].label
+        }
       />
       <div className="scene-label">
-        <span>3D ILLUSTRATION</span>
+        <span>3D VISUAL STUDY</span>
         <span>{environments[scenario.environment].gravity}</span>
       </div>
       <span className="scene-instruction">
-        Drag to rotate · Shape is qualitative
+        Drag to orbit · Scroll to zoom · Right-drag to pan
       </span>
+      <div className="scene-actions">
+        <button type="button" onClick={() => resetCamera.current?.()}>
+          <Icon name="compass" size={13} />
+          Reset view
+        </button>
+        <button
+          type="button"
+          aria-label="Expand simulation scene"
+          onClick={async () => {
+            try {
+              if (document.fullscreenElement) await document.exitFullscreen();
+              else if (stage.current?.requestFullscreen)
+                await stage.current.requestFullscreen();
+              else setError("Fullscreen is unavailable in this browser.");
+            } catch {
+              setError("Fullscreen could not open.");
+            }
+          }}
+        >
+          <Icon name="external" size={13} />
+          Expand
+        </button>
+      </div>
+      {scenario.cool && (
+        <div className="cool-view-note">
+          <strong>Visible flame extinguished</strong>
+          <span>
+            Droplet evaporation schematic. Cool-flame light is too faint to
+            depict as a bright flame; burn rate is not predicted.
+          </span>
+        </div>
+      )}
+      {(scenario.environment === "moon" || scenario.environment === "mars") && (
+        <span className="scene-projection">
+          Illustrative projection · no matched shape measurements
+        </span>
+      )}
       {error && (
         <p role="status" className="scene-error">
           {error}
