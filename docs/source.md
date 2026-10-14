@@ -136,3 +136,8 @@
 - SAME-2 particle morphology and size: https://ntrs.nasa.gov/citations/20130000422
 
 Original PDFs are saved in Drive. Source URLs, direct PDF URLs, checksums and Drive file IDs are in sources.json. See how-to-use-data-sources.md for ingestion and citation rules. No new PDF-to-TXT copies were retained in this audit.
+
+
+## Additional flame-behavior source review — 14 October 2026
+
+See [flame-data-roadmap.md](flame-data-roadmap.md) for FLEX PSI-69, Saffire-I PSI-98, LUCI, BASS modeling PSI-62 and cool-flame CFD PSI-117. Source discovery does not mean raw files have been ingested or a physics model has been validated. The app lists these references with their extraction status.

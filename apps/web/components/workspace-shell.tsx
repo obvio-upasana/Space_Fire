@@ -53,11 +53,12 @@ export function WorkspaceShell({ children }: { children: ReactNode }) {
       )}
       <aside className={`workspace-sidebar ${mobileOpen ? "mobile-open" : ""}`}>
         <div className="sidebar-brand">
-          <Brand compact={collapsed} />
+          <Brand compact={false} />
           <button
             className="icon-button"
             aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
             title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+            aria-expanded={!collapsed}
             onClick={() => setCollapsed(!collapsed)}
           >
             <Icon name="sidebar" size={17} />
@@ -82,8 +83,12 @@ export function WorkspaceShell({ children }: { children: ReactNode }) {
               href={n.href}
               title={n.label}
               onClick={() => setMobileOpen(false)}
-              className={`sidebar-link ${pathname === n.href ? "active" : ""}`}
-              aria-current={pathname === n.href ? "page" : undefined}
+              className={`sidebar-link ${pathname === n.href || pathname.startsWith(n.href + "/") ? "active" : ""}`}
+              aria-current={
+                pathname === n.href || pathname.startsWith(n.href + "/")
+                  ? "page"
+                  : undefined
+              }
             >
               <Icon name={n.icon} size={18} />
               <span>{n.label}</span>
@@ -91,20 +96,11 @@ export function WorkspaceShell({ children }: { children: ReactNode }) {
           ))}
         </nav>
         <div className="sidebar-bottom">
-          <Link
-            href="/trust"
-            className="sidebar-link secondary-nav"
-            title="Evidence and limits"
-          >
-            <Icon name="shield" size={17} />
-            <span>Evidence & limits</span>
-          </Link>
-          <Link href="/login" className="profile-row">
+          <Link href="/profile" className="profile-row" title="Your profile">
             <span className="avatar">TS</span>
             <span>
               Tanveer Singh<small>Personal workspace</small>
             </span>
-            <Icon name="chevron" size={14} />
           </Link>
         </div>
       </aside>
@@ -119,19 +115,15 @@ export function WorkspaceShell({ children }: { children: ReactNode }) {
               <Icon name="menu" />
             </button>
             <span className="header-breadcrumb">
-              {current?.label ?? "Evidence & limits"}
+              {current?.label ??
+                (pathname === "/profile"
+                  ? "Your profile"
+                  : "Research workspace")}
             </span>
           </div>
           <div className="header-reference">
             <span className="reference-dot" />
             <span>NASA research archive</span>
-            <Link
-              href="/sources"
-              className="icon-button"
-              aria-label="Search original sources"
-            >
-              <Icon name="search" size={18} />
-            </Link>
           </div>
         </header>
         <main

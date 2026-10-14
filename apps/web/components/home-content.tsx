@@ -192,6 +192,42 @@ function HomeFooter() {
           <ButtonLink href="/assistant">Open FlameAtlas</ButtonLink>
         </div>
       </section>
+      <section id="evidence" className="footer-evidence landing-section">
+        <p className="eyebrow">SOURCES & SCIENTIFIC LIMITS</p>
+        <h2>Keep the original beside the answer.</h2>
+        <p>
+          Research records preserve NASA references and experimental conditions.
+          The current research desk uses scripted responses. The 3D view
+          illustrates selected concepts; it does not calculate flame spread,
+          temperature or extinction limits.
+        </p>
+        <div className="footer-source-links">
+          <a
+            href="https://psi.nasa.gov/physci/repo/data/investigations/PSI-25"
+            target="_blank"
+            rel="noreferrer"
+          >
+            BASS-II · solid fuels
+          </a>
+          <a
+            href="https://psi.nasa.gov/physci/repo/data/investigations/PSI-69"
+            target="_blank"
+            rel="noreferrer"
+          >
+            FLEX · droplets
+          </a>
+          <a
+            href="https://psi.nasa.gov/physci/repo/data/investigations/PSI-98"
+            target="_blank"
+            rel="noreferrer"
+          >
+            Saffire · larger fires
+          </a>
+          <a href="https://ntrs.nasa.gov/" target="_blank" rel="noreferrer">
+            NASA technical reports
+          </a>
+        </div>
+      </section>
       <footer className="home-footer">
         <div>
           <Brand />
@@ -199,7 +235,7 @@ function HomeFooter() {
         </div>
         <div>
           <Link href="/sources">Original research</Link>
-          <Link href="/trust">Evidence & limits</Link>
+          <a href="#evidence">Sources & scientific limits</a>
           <Link href="/login">
             Enter workspace <Icon name="external" size={14} />
           </Link>
