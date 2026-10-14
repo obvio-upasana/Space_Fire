@@ -11,16 +11,25 @@ import "./workspace.css";
 import "./editorial.css";
 import "./ai.css";
 import "./professional.css";
-import { neue, book, kode } from "./fonts";
+import "./product.css";
+import "./veritas.css";
+import { neue, book, kode, figtree, newsreader } from "./fonts";
 
 export const metadata: Metadata = {
-  title: { default: "FlameAtlas | Fire behaves differently here", template: "%s | FlameAtlas" },
-  description: "Explore the science of fire beyond Earth. A static demonstration of the FlameAtlas research workspace.",
+  title: {
+    default: "FlameAtlas | Fire behaves differently here",
+    template: "%s | FlameAtlas",
+  },
+  description:
+    "Explore the science of fire beyond Earth. A static demonstration of the FlameAtlas research workspace.",
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" className={`${neue.variable} ${book.variable} ${kode.variable}`}>
+    <html
+      lang="en"
+      className={`${neue.variable} ${book.variable} ${kode.variable} ${figtree.variable} ${newsreader.variable}`}
+    >
       <body>{children}</body>
     </html>
   );
